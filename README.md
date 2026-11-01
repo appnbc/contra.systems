@@ -36,4 +36,5 @@ copy contains an ampersand, and it warns about missing or unused files in
 
 `J`/`K` or `↑`/`↓` step through sections · `←`/`→` move between figures ·
 `Enter`/`Space` open a figure · `T` Day/Night · `L` EN → ES → IT ·
-`Esc` closes the viewer, or returns to the index from a project page.
+`Esc` closes the viewer, or (like `Backspace`) returns to the index from a
+project page.

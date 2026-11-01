@@ -90,6 +90,18 @@ class Page {
   alt(l) { return `${this.root}${pagePath(l, this.slug)}`; }
 }
 
+// wrap direction arrows so they can move on hover; drop the ▶ glyph (an icon replaces it)
+const ARROWS = [[/ →$/, ' <span class="arrow-r" aria-hidden="true">→</span>'], [/^← /, '<span class="arrow-l" aria-hidden="true">←</span> '], [/ ↗$/, ' <span class="arrow-ne" aria-hidden="true">↗</span>'], [/^▶ /, '']];
+const arrowize = (t) => {
+  const out = {};
+  for (const l of LANGS) out[l] = ARROWS.reduce((s, [re, r]) => s.replace(re, r), t[l]);
+  return out;
+};
+const SUN = '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="2.2"/><path d="M6 .8v1.3M6 9.9v1.3M.8 6h1.3M9.9 6h1.3M2.3 2.3l.9.9M8.8 8.8l.9.9M2.3 9.7l.9-.9M8.8 3.2l.9-.9"/></svg>';
+const MOON = '<svg class="moon" viewBox="0 0 12 12" aria-hidden="true"><path d="M8.9 7.9A4.4 4.4 0 0 1 4.1 3.1 4.4 4.4 0 1 0 8.9 7.9z"/></svg>';
+const PLAY = '<span class="watch-icon" aria-hidden="true"><svg viewBox="0 0 9 10"><path d="M0 0l9 5-9 5z"/></svg></span>';
+const kickerOf = (slug) => projects.find((p) => p.slug === slug).kicker;
+
 const withNum = (t, n) => ({ en: `${t.en} ${n}`, es: `${t.es} ${n}`, it: `${t.it} ${n}` });
 
 function figure(pg, fig, n, kind) {
@@ -99,7 +111,7 @@ function figure(pg, fig, n, kind) {
     ? `<video src="${src}" poster="${pg.m(fig.src.replace('.mp4', '.jpg'))}" width="${w}" height="${h}" muted loop playsinline autoplay preload="metadata" ${pg.a([['aria-label', fig.cap]])}></video>`
     : `<img src="${src}" width="${w}" height="${h}" ${kind === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" ${pg.a([['alt', fig.cap]])}>`;
   return `
-      <figure class="fig fig--${kind}" data-fig="${n}">
+      <figure class="fig fig--${kind}${isVideo(fig.src) ? ' fig--video' : ''}" data-fig="${n}">
         <button type="button" class="fig-open" data-full="${src}" ${pg.a([['aria-label', withNum(ui.openFig, n)]])}>
           <span class="mat">${media}</span>
         </button>
@@ -162,19 +174,19 @@ ${alternates}
 function topbar(pg) {
   const homeHref = pg.slug ? '../index.html' : '#main';
   const brand = `<a class="brand" href="${homeHref}"><img class="mark" src="${pg.m('quetzal.png')}" width="158" height="244" alt=""><span>Brian Contreras</span></a>`;
-  const langs = LANGS.map((l) => `<a href="${pg.alt(l)}" data-set-lang="${l}" hreflang="${l}" lang="${l}"${l === pg.lang ? ' aria-current="true"' : ''}>${l.toUpperCase()}</a>`).join('<span class="sep" aria-hidden="true">/</span>');
+  const langs = LANGS.map((l) => `<a href="${pg.alt(l)}" data-set-lang="${l}" hreflang="${l}" lang="${l}"${l === pg.lang ? ' aria-current="true"' : ''}>${l.toUpperCase()}</a>`).join('');
   const nav = pg.slug ? '' : `
     <nav class="quick-nav" ${pg.a([['aria-label', ui.sectionsNav]])}>
       ${ui.nav.map((n) => `<a href="${n.href}" ${pg.t(n.label)}>${pg.s(n.label)}</a>`).join('\n      ')}
     </nav>`;
   return `
+<div class="rail" aria-hidden="true"></div>
 <header class="topbar">
   <div class="topbar-row">
     ${brand}${nav}
     <div class="utils">
-      <div class="seg" role="group" ${pg.a([['aria-label', ui.langGroup]])}>${langs}</div>
-      <span class="divider" aria-hidden="true">|</span>
-      <div class="seg" role="group" ${pg.a([['aria-label', ui.themeGroup]])}><button type="button" data-set-theme="day" aria-pressed="true" ${pg.t(ui.day)}>${pg.s(ui.day)}</button><span class="sep" aria-hidden="true">/</span><button type="button" data-set-theme="night" aria-pressed="false" ${pg.t(ui.night)}>${pg.s(ui.night)}</button></div>
+      <div class="seg seg--lang" role="group" ${pg.a([['aria-label', ui.langGroup]])}>${langs}</div>
+      <div class="seg seg--theme" role="group" ${pg.a([['aria-label', ui.themeGroup]])}><button type="button" data-set-theme="day" aria-pressed="true">${SUN}<span ${pg.t(ui.day)}>${pg.s(ui.day)}</span></button><button type="button" data-set-theme="night" aria-pressed="false">${MOON}<span ${pg.t(ui.night)}>${pg.s(ui.night)}</span></button></div>
     </div>
   </div>
 </header>
@@ -183,19 +195,22 @@ function topbar(pg) {
 
 function footer(pg) {
   const back = pg.slug ? `
-    <a href="../index.html" ${pg.t(ui.backAll)}>${pg.s(ui.backAll)}</a>` : '';
+    <a class="u" href="../index.html" ${pg.t(arrowize(ui.backAll))}>${pg.s(arrowize(ui.backAll))}</a>` : '';
   const legend = pg.slug ? ui.legendProject : ui.legendHome;
   return `
 <footer class="site-footer">
   <div class="footer-row">
     <span>Brian Contreras, 2026</span>${back}
-    <a href="mailto:${EMAIL}" ${pg.t(ui.touch)}>${pg.s(ui.touch)}</a>
+    <a class="u" href="mailto:${EMAIL}" ${pg.t(ui.touch)}>${pg.s(ui.touch)}</a>
     <span class="copy-wrap">
       <button type="button" class="copy-email" data-email="${EMAIL}"><span ${pg.t(ui.copy)}>${pg.s(ui.copy)}</span></button>
       <span class="copy-badge" role="status" aria-live="polite"></span>
     </span>
   </div>
-  <p class="kbd-legend" ${pg.t(legend)}>${pg.s(legend)}</p>
+  <div class="footer-sub">
+    <p class="kbd-legend" ${pg.t(legend)}>${pg.s(legend)}</p>
+    <div class="sig" aria-hidden="true"></div>
+  </div>
 </footer>
 `;
 }
@@ -241,7 +256,10 @@ function buildHome(lang) {
   html += topbar(pg);
   html += `
 <main id="main" tabindex="-1">
-  <h1 class="headline" ${pg.t(home.headline)}>${pg.s(home.headline)}</h1>
+  <section class="hero-intro">
+    <h1 class="headline" ${pg.t(home.headline)}>${pg.s(home.headline)}</h1>
+    <figure class="weave" aria-hidden="true"><canvas></canvas></figure>
+  </section>
 `;
   const st = home.statement;
   html += block('01', 'statement', label(st.label), p(st.body),
@@ -249,10 +267,11 @@ function buildHome(lang) {
 
   html += `\n  <div id="works">`;
   for (const w of home.works) {
-    const titleLink = `<h2 class="label"><a class="category-link" href="${w.slug}/index.html" data-preview="${pg.m(w.preview)}"><span ${pg.t(w.title)}>${pg.s(w.title)}</span> <span class="arrow" aria-hidden="true">↗</span></a></h2>`;
+    const titleLink = `<h2 class="label"><a class="category-link" href="${w.slug}/index.html"><span ${pg.t(w.title)}>${pg.s(w.title)}</span> <span class="arrow-ne" aria-hidden="true">↗</span></a></h2>
+      <div class="peek" aria-hidden="true"><div class="peek-inner"><span class="mat"><img src="${pg.m(w.preview)}" loading="lazy" decoding="async" alt=""></span><span class="peek-label" ${pg.t(kickerOf(w.slug))}>${pg.s(kickerOf(w.slug))}</span></div></div>`;
     html += block(w.index, `work-${w.index}`, titleLink,
       specTable(pg, w.specs) + p(w.body) + `
-      <a class="cta" href="${w.slug}/index.html" ${pg.t(w.cta)}>${pg.s(w.cta)}</a>`);
+      <a class="cta u" href="${w.slug}/index.html" ${pg.t(arrowize(w.cta))}>${pg.s(arrowize(w.cta))}</a>`);
   }
   html += `  </div>\n`;
 
@@ -266,7 +285,7 @@ function buildHome(lang) {
   const items = pub.items.map((it) => `
         <li>
           <span class="pub-kind" ${pg.t(it.kind)}>${pg.s(it.kind)}</span>
-          <span class="pub-text"><span ${pg.t(it.text)}>${pg.s(it.text)}</span>${it.href ? ` <a class="doc-link" href="${it.href}" ${pg.t(it.link)}>${pg.s(it.link)}</a>` : ''}</span>
+          <span class="pub-text"><span ${pg.t(it.text)}>${pg.s(it.text)}</span>${it.href ? ` <a class="doc-link u" href="${it.href}" ${pg.t(arrowize(it.link))}>${pg.s(arrowize(it.link))}</a>` : ''}</span>
         </li>`).join('');
   html += block('10', 'publications', label(pub.label), p(pub.intro) + `
       <ol class="pubs">${items}
@@ -289,10 +308,10 @@ function buildProject(pr, lang) {
   html += `
 <main id="main" tabindex="-1">
   <header class="subpage-header" data-step>
-    <a href="../index.html#work-${pr.index}" class="back-link" ${pg.t(ui.back)}>${pg.s(ui.back)}</a>
-    <p class="subpage-meta"><span ${pg.t(ui.indexWord)}>${pg.s(ui.indexWord)}</span> ${pr.index} // <span ${pg.t(pr.kicker)}>${pg.s(pr.kicker)}</span></p>
+    <a href="../index.html#work-${pr.index}" class="back-link u" ${pg.t(arrowize(ui.back))}>${pg.s(arrowize(ui.back))}</a>
+    <p class="subpage-meta"><span ${pg.t(ui.indexWord)}>${pg.s(ui.indexWord)}</span> <span class="num">${pr.index}</span> // <span ${pg.t(pr.kicker)}>${pg.s(pr.kicker)}</span></p>
     <h1 class="subpage-title" ${pg.t(pr.title)}>${pg.s(pr.title)}</h1>${pr.video ? `
-    <a class="watch" href="${pr.video.href}" target="_blank" rel="noopener" ${pg.t(pr.video.label)}>${pg.s(pr.video.label)}</a>` : ''}
+    <a class="watch" href="${pr.video.href}" target="_blank" rel="noopener">${PLAY}<span ${pg.t(arrowize(pr.video.label))}>${pg.s(arrowize(pr.video.label))}</span></a>` : ''}
   </header>
   <div class="hero" data-step>${figure(pg, pr.hero, 1, 'hero')}
   </div>
