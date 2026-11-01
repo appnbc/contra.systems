@@ -97,8 +97,19 @@ const arrowize = (t) => {
   for (const l of LANGS) out[l] = ARROWS.reduce((s, [re, r]) => s.replace(re, r), t[l]);
   return out;
 };
-const SUN = '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="2.2"/><path d="M6 .8v1.3M6 9.9v1.3M.8 6h1.3M9.9 6h1.3M2.3 2.3l.9.9M8.8 8.8l.9.9M2.3 9.7l.9-.9M8.8 3.2l.9-.9"/></svg>';
-const MOON = '<svg class="moon" viewBox="0 0 12 12" aria-hidden="true"><path d="M8.9 7.9A4.4 4.4 0 0 1 4.1 3.1 4.4 4.4 0 1 0 8.9 7.9z"/></svg>';
+// Prismatic theme icons: simple geometry and SVG gradients whose stops take
+// the prism colours from CSS (muted by Day, more luminous by Night).
+const SUN = `<svg class="ico ico-sun" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><defs>`
+  + `<radialGradient id="ico-sun-core" cx="38%" cy="36%" r="72%"><stop offset="0" class="st-yellow"/><stop offset=".55" class="st-amber"/><stop offset="1" class="st-coral"/></radialGradient>`
+  + `<linearGradient id="ico-sun-rays" x1="1" y1="1" x2="15" y2="15" gradientUnits="userSpaceOnUse"><stop offset="0" class="st-amber"/><stop offset=".5" class="st-coral"/><stop offset="1" class="st-violet"/></linearGradient>`
+  + `</defs><circle cx="8" cy="8" r="3.2" fill="url(#ico-sun-core)"/><path class="glass" d="M6.2 7.3 8 6.1l1.8 1.2"/>`
+  + `<circle class="rim" cx="8" cy="8" r="4.4" stroke="url(#ico-sun-rays)" opacity=".4"/>`
+  + `<path class="rays" stroke="url(#ico-sun-rays)" d="M8 .7v1.9M8 13.4v1.9M.7 8h1.9M13.4 8h1.9M3.1 3.1l.95.95M11.95 11.95l.95.95M3.1 12.9l.95-.95M11.95 4.05l.95-.95"/></svg>`;
+const MOON = `<svg class="ico ico-moon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><defs>`
+  + `<linearGradient id="ico-moon-g" x1="2.5" y1="3" x2="11" y2="15" gradientUnits="userSpaceOnUse"><stop offset="0" class="st-cyan"/><stop offset=".3" class="st-blue"/><stop offset=".55" class="st-violet"/><stop offset=".8" class="st-rose"/><stop offset="1" class="st-amber"/></linearGradient>`
+  + `<mask id="ico-moon-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16"><rect width="16" height="16" fill="#fff"/><circle cx="10.9" cy="5.6" r="4.9" fill="#000"/></mask>`
+  + `</defs><g mask="url(#ico-moon-cut)"><circle cx="7.4" cy="8.6" r="6" fill="url(#ico-moon-g)"/><circle class="glass" cx="7.4" cy="8.6" r="4.5"/></g>`
+  + `<path class="glint" d="M13.3 1.5l.42 1.08 1.08.42-1.08.42-.42 1.08-.42-1.08-1.08-.42 1.08-.42z"/></svg>`;
 const PLAY = '<span class="watch-icon" aria-hidden="true"><svg viewBox="0 0 9 10"><path d="M0 0l9 5-9 5z"/></svg></span>';
 const kickerOf = (slug) => projects.find((p) => p.slug === slug).kicker;
 
@@ -132,7 +143,7 @@ function head(pg, { title, description }) {
   const alternates = LANGS.map((l) => `  <link rel="alternate" hreflang="${l}" href="${SITE_URL}${pagePath(l, pg.slug)}">`).join('\n');
   const altData = LANGS.map((l) => `data-alt-${l}="${pg.alt(l)}"`).join(' ');
   return `<!doctype html>
-<html lang="${pg.lang}" data-lang="${pg.lang}" data-theme="day" ${altData}>
+<html lang="${pg.lang}" data-lang="${pg.lang}" data-theme="day"${pg.section ? ` data-active="${pg.section}"` : ''} ${altData}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -166,7 +177,7 @@ ${alternates}
   </script>
   <link rel="stylesheet" href="${pg.root}assets/style.css">
 </head>
-<body class="${pg.slug ? 'is-project' : 'is-home'}">
+<body class="${pg.slug ? 'is-project' : 'is-home'}"${pg.section ? ` data-section="${pg.section}"` : ''}>
 <a class="skip-link" href="#main" ${pg.t(ui.skip)}>${pg.s(ui.skip)}</a>
 <div class="atmos" aria-hidden="true"><i class="atmos-day"></i><i class="atmos-night"></i></div>
 `;
@@ -175,19 +186,21 @@ ${alternates}
 function topbar(pg) {
   const homeHref = pg.slug ? '../index.html' : '#main';
   const brand = `<a class="brand" href="${homeHref}"><img class="mark" src="${pg.m('quetzal.png')}" width="158" height="244" alt=""><span>Brian Contreras</span></a>`;
-  const langs = LANGS.map((l) => `<a href="${pg.alt(l)}" data-set-lang="${l}" hreflang="${l}" lang="${l}"${l === pg.lang ? ' aria-current="true"' : ''}>${l.toUpperCase()}</a>`).join('');
+  const langs = LANGS.map((l) => `<a href="${pg.alt(l)}" data-set-lang="${l}" hreflang="${l}" lang="${l}" aria-keyshortcuts="2"${l === pg.lang ? ' aria-current="true"' : ''}>${l.toUpperCase()}</a>`).join('');
   const nav = pg.slug ? '' : `
     <nav class="quick-nav" ${pg.a([['aria-label', ui.sectionsNav]])}>
-      ${ui.nav.map((n) => `<a href="${n.href}" ${pg.t(n.label)}>${pg.s(n.label)}</a>`).join('\n      ')}
+      ${ui.nav.map((n) => `<a href="${n.href}" data-section="${n.section}" ${pg.t(n.label)}>${pg.s(n.label)}</a>`).join('\n      ')}
     </nav>`;
+  // a small keycap beside each control shows its numeric shortcut
+  const keycap = (k) => `<kbd class="keycap" data-key="${k}" aria-hidden="true" ${pg.a([['title', withNum(ui.shortcut, k)]])}>${k}</kbd>`;
   return `
 <div class="rail" aria-hidden="true"></div>
 <header class="topbar">
   <div class="topbar-row">
     ${brand}${nav}
     <div class="utils">
-      <div class="seg seg--lang" role="group" ${pg.a([['aria-label', ui.langGroup]])}>${langs}</div>
-      <div class="seg seg--theme" role="group" ${pg.a([['aria-label', ui.themeGroup]])}><button type="button" data-set-theme="day" aria-pressed="true">${SUN}<span ${pg.t(ui.day)}>${pg.s(ui.day)}</span></button><button type="button" data-set-theme="night" aria-pressed="false">${MOON}<span ${pg.t(ui.night)}>${pg.s(ui.night)}</span></button></div>
+      <div class="ctl"><div class="seg seg--lang" role="group" ${pg.a([['aria-label', ui.langGroup]])}>${langs}</div>${keycap(2)}</div>
+      <div class="ctl"><div class="seg seg--theme" role="group" ${pg.a([['aria-label', ui.themeGroup]])}><button type="button" data-set-theme="day" aria-pressed="true" aria-keyshortcuts="1">${SUN}<span ${pg.t(ui.day)}>${pg.s(ui.day)}</span></button><button type="button" data-set-theme="night" aria-pressed="false" aria-keyshortcuts="1">${MOON}<span ${pg.t(ui.night)}>${pg.s(ui.night)}</span></button></div>${keycap(1)}</div>
     </div>
   </div>
 </header>
@@ -197,7 +210,6 @@ function topbar(pg) {
 function footer(pg) {
   const back = pg.slug ? `
     <a class="u" href="../index.html" ${pg.t(arrowize(ui.backAll))}>${pg.s(arrowize(ui.backAll))}</a>` : '';
-  const legend = pg.slug ? ui.legendProject : ui.legendHome;
   return `
 <footer class="site-footer">
   <div class="footer-row">
@@ -209,7 +221,6 @@ function footer(pg) {
     </span>
   </div>
   <div class="footer-sub">
-    <p class="kbd-legend" ${pg.t(legend)}>${pg.s(legend)}</p>
     <div class="sig" aria-hidden="true"></div>
   </div>
 </footer>
@@ -239,8 +250,9 @@ function write(pg, html) {
 // ---------------------------------------------------------------------
 function buildHome(lang) {
   const pg = new Page(lang, '');
-  const block = (index, id, labelHtml, content, extraMeta = '') => `
-  <section class="block"${id ? ` id="${id}"` : ''} data-step>
+  // every block carries its section number as its colour identity (data-section)
+  const block = (index, id, labelHtml, content, extraMeta = '', cls = '') => `
+  <section class="block${cls ? ` ${cls}` : ''}"${id ? ` id="${id}"` : ''} data-section="${index}" data-step>
     <div class="block-meta">
       <span class="index">${index}</span>
       ${labelHtml}${extraMeta}
@@ -252,21 +264,34 @@ function buildHome(lang) {
   const label = (t) => `<h2 class="label" ${pg.t(t)}>${pg.s(t)}</h2>`;
   const p = (t) => `
       <p ${pg.t(t)}>${pg.s(t)}</p>`;
+  const voice = (t) => t ? `
+      <p class="work-voice" ${pg.t(t)}>${pg.s(t)}</p>` : '';
 
   let html = head(pg, { title: home.title, description: home.description });
   html += topbar(pg);
   html += `
 <main id="main" tabindex="-1">
   <section class="hero-intro">
-    <h1 class="headline" ${pg.t(home.headline)}>${pg.s(home.headline)}</h1>
+    <div class="hero-text">
+      <h1 class="headline" ${pg.t(home.headline)}>${pg.s(home.headline)}</h1>
+      <p class="descriptor" ${pg.t(home.descriptor)}>${pg.s(home.descriptor)}</p>
+      <p class="descriptor-support" ${pg.t(home.descriptorSupport)}>${pg.s(home.descriptorSupport)}</p>
+    </div>
     <div class="weave-wrap">
-      <figure class="weave" role="button" tabindex="0" ${pg.a([['aria-label', ui.weaveLabel]])}><canvas aria-hidden="true"></canvas></figure>
+      <figure class="weave" role="button" tabindex="0" ${pg.a([['aria-label', ui.weaveLabel]])}><canvas aria-hidden="true"></canvas><div class="greet" aria-hidden="true"></div></figure>
       <p class="weave-hint" aria-hidden="true"><i></i><span ${pg.t(ui.weaveHint)}>${pg.s(ui.weaveHint)}</span></p>
+      <p class="sr-only greet-status" role="status"></p>
     </div>
   </section>
 `;
   const st = home.statement;
-  html += block('01', 'statement', label(st.label), p(st.body),
+  const practices = `
+      <ul class="practices" ${pg.a([['aria-label', ui.practices]])}>${st.practices.map((x) => `
+        <li><h3 ${pg.t(x.title)}>${pg.s(x.title)}</h3><p ${pg.t(x.text)}>${pg.s(x.text)}</p></li>`).join('')}
+      </ul>`;
+  html += block('01', 'statement', label(st.label), `
+      <div class="prose-serif">${st.body.map(p).join('')}
+      </div>` + practices,
     `\n      <img class="headshot" src="${pg.m('headshot.png')}" width="158" height="243" loading="lazy" decoding="async" ${pg.a([['alt', st.headshotAlt]])}>`);
 
   html += `\n  <div id="works">`;
@@ -274,13 +299,18 @@ function buildHome(lang) {
     const titleLink = `<h2 class="label"><a class="category-link" href="${w.slug}/index.html"><span ${pg.t(w.title)}>${pg.s(w.title)}</span> <span class="arrow-ne" aria-hidden="true">↗</span></a></h2>
       <div class="peek" aria-hidden="true"><div class="peek-inner"><span class="mat"><img src="${pg.m(w.preview)}" loading="lazy" decoding="async" alt=""></span><span class="peek-label" ${pg.t(kickerOf(w.slug))}>${pg.s(kickerOf(w.slug))}</span></div></div>`;
     html += block(w.index, `work-${w.index}`, titleLink,
-      specTable(pg, w.specs) + p(w.body) + `
+      voice(w.voice) + specTable(pg, w.specs) + p(w.body) + `
       <a class="cta u" href="${w.slug}/index.html" ${pg.t(arrowize(w.cta))}>${pg.s(arrowize(w.cta))}</a>`);
   }
   html += `  </div>\n`;
 
   const sy = home.systems;
-  html += block('08', 'systems', label(sy.label), p(sy.body) + `
+  // each term is shown in all three languages; the one being read is set darker
+  const terms = `
+      <ul class="marginalia" ${pg.a([['aria-label', ui.terms]])}>${sy.terms.map(([en, es, it]) => `
+        <li><span lang="en">${en}</span><span class="sl" aria-hidden="true">/</span><span lang="es">${es}</span><span class="sl" aria-hidden="true">/</span><span lang="it">${it}</span></li>`).join('')}
+      </ul>`;
+  html += block('08', 'systems', label(sy.label), p(sy.body) + terms + `
       <div class="gallery gallery--inline">${sy.figs.map((f, i) => figure(pg, f, i + 1, 'card')).join('')}
       </div>`);
   html += block('09', 'ludology', label(home.ludology.label), p(home.ludology.body));
@@ -294,7 +324,16 @@ function buildHome(lang) {
   html += block('10', 'publications', label(pub.label), p(pub.intro) + `
       <ol class="pubs">${items}
       </ol>`);
-  html += block('11', 'coda', label(home.coda.label), p(home.coda.body));
+  // the closing answers the opening greeting: a spectral line across all eleven
+  // section colours, ending on the rose of the coda, and a trilingual thanks
+  const signal = `
+      <div class="coda-signal">
+        <span class="line" aria-hidden="true"></span><span class="mark-end" aria-hidden="true"></span>
+        <p class="coda-thanks"><span lang="en">Thank you<span class="gp p1">!</span></span><span lang="es"><span class="gp p2">¡</span>Gracias<span class="gp p2">!</span></span><span lang="it">Grazie<span class="gp p3">!</span></span></p>
+      </div>`;
+  html += block('11', 'coda', label(home.coda.label), `
+      <div class="prose-serif">${p(home.coda.body)}
+      </div>` + signal);
   html += `</main>\n`;
   html += footer(pg);
   html += tail(pg);
@@ -306,6 +345,7 @@ function buildHome(lang) {
 // ---------------------------------------------------------------------
 function buildProject(pr, lang) {
   const pg = new Page(lang, pr.slug);
+  pg.section = pr.index;   // the project page inherits its homepage section colour
   const title = { en: `${strip(pr.title.en)} — Brian Contreras`, es: `${strip(pr.title.es)} — Brian Contreras`, it: `${strip(pr.title.it)} — Brian Contreras` };
   let html = head(pg, { title, description: pr.description });
   html += topbar(pg);
@@ -327,7 +367,8 @@ function buildProject(pr, lang) {
       <span class="index">${s.num}</span>
       <h2 class="label" ${pg.t(s.heading)}>${pg.s(s.heading)}</h2>
     </div>
-    <div class="block-content">${specTable(pg, s.specs)}${s.body ? `
+    <div class="block-content">${s.voice ? `
+      <p class="work-voice" ${pg.t(s.voice)}>${pg.s(s.voice)}</p>` : ''}${specTable(pg, s.specs)}${s.body ? `
       <p ${pg.t(s.body)}>${pg.s(s.body)}</p>` : ''}
     </div>
   </section>

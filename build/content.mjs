@@ -24,14 +24,17 @@ export const ui = {
   sectionsNav: L('Sections', 'Secciones', 'Sezioni'),
   weaveHint: L('Interact to explore', 'Interactúa para explorar', 'Interagisci per esplorare'),
   weaveLabel: L(
-    'Interactive woven grid. Press Enter or Space to send a wave of light through it.',
-    'Retícula tejida interactiva. Pulsa Intro o Espacio para enviar una onda de luz a través de ella.',
-    'Griglia intrecciata interattiva. Premi Invio o Spazio per inviare un\'onda di luce attraverso di essa.'),
+    'Activate the interactive visual. Press Enter or Space to send a wave of light and a multilingual greeting through the woven grid.',
+    'Activar la obra visual interactiva. Pulsa Intro o Espacio para enviar una onda de luz y un saludo multilingüe a través de la retícula tejida.',
+    "Attiva l'opera visiva interattiva. Premi Invio o Spazio per inviare un'onda di luce e un saluto multilingue attraverso la griglia intrecciata."),
+  shortcut: L('Keyboard shortcut:', 'Atajo de teclado:', 'Scorciatoia da tastiera:'),
+  terms: L('Terms in three languages', 'Términos en tres idiomas', 'Termini in tre lingue'),
+  practices: L('Three intersecting practices', 'Tres prácticas que se cruzan', 'Tre pratiche che si intersecano'),
   nav: [
-    { href: '#statement', label: L('01 Statement', '01 Declaración', '01 Dichiarazione') },
-    { href: '#works', label: L('02–07 Works', '02–07 Obras', '02–07 Opere') },
-    { href: '#systems', label: L('08–09 Systems and Ludology', '08–09 Sistemas y Ludología', '08–09 Sistemi e Ludologia') },
-    { href: '#publications', label: L('10 Written Work', '10 Publicaciones', '10 Pubblicazioni') },
+    { href: '#statement', section: '01', label: L('01 Statement', '01 Declaración', '01 Dichiarazione') },
+    { href: '#works', section: '02', label: L('02–07 Works', '02–07 Obras', '02–07 Opere') },
+    { href: '#systems', section: '08', label: L('08–09 Language and Play', '08–09 Lenguaje y Juego', '08–09 Linguaggio e Gioco') },
+    { href: '#publications', section: '10', label: L('10 Written Work', '10 Obra Escrita', '10 Opere Scritte') },
   ],
   back: L('← Return to Curated Overview', '← Volver al Resumen Curatorial', '← Torna alla Panoramica Curata'),
   indexWord: L('Index', 'Índice', 'Indice'),
@@ -45,15 +48,11 @@ export const ui = {
   prev: L('Previous', 'Anterior', 'Precedente'),
   next: L('Next', 'Siguiente', 'Successivo'),
   close: L('Close', 'Cerrar', 'Chiudi'),
-  legendHome: L(
-    '<kbd>↑/↓</kbd> Navigate · <kbd>T</kbd> Day/Night · <kbd>L</kbd> Language',
-    '<kbd>↑/↓</kbd> Navegar · <kbd>T</kbd> Día/Noche · <kbd>L</kbd> Idioma',
-    '<kbd>↑/↓</kbd> Naviga · <kbd>T</kbd> Giorno/Notte · <kbd>L</kbd> Lingua'),
-  legendProject: L(
-    '<kbd>↑/↓</kbd> Navigate · <kbd>T</kbd> Day/Night · <kbd>L</kbd> Language · <kbd>ESC</kbd> Index',
-    '<kbd>↑/↓</kbd> Navegar · <kbd>T</kbd> Día/Noche · <kbd>L</kbd> Idioma · <kbd>ESC</kbd> Índice',
-    '<kbd>↑/↓</kbd> Naviga · <kbd>T</kbd> Giorno/Notte · <kbd>L</kbd> Lingua · <kbd>ESC</kbd> Indice'),
 };
+
+// The six hero greetings are deliberately shown in all three languages at
+// once, whatever language the page is in. They live in assets/site.js
+// (GREETINGS) so their punctuation can be styled separately.
 
 export const specLabels = {
   role: L('Role', 'Rol', 'Ruolo'),
@@ -65,6 +64,16 @@ export const specLabels = {
 };
 
 const about = L('About the Work', 'Sobre la Obra', "Informazioni sull'Opera");
+
+// The Agent: one concise descriptor (set in the serif voice) and its description
+const AGENT_VOICE = L(
+  'Acoustic performance and scenographic intervention exploring voice, expression, and automated language.',
+  'Performance acústica e intervención escenográfica que explora la voz, la expresión y el lenguaje automatizado.',
+  "Performance acustica e intervento scenografico che esplora la voce, l'espressione e il linguaggio automatizzato.");
+const AGENT_BODY = L(
+  '<em>The Agent</em> is a site-specific performance combining spoken word, reactive theatrical lighting, and spatial scenography to explore the tension between automated speech systems and the human voice. Treating the voice as both expressive and acoustic material, the work stages poetry, light, and algorithmic processing within one immersive environment, examining how computational rules frame vocal expression, identity, and bodily presence inside a shared performance space.',
+  '<em>The Agent</em> es una performance específica para el espacio que combina palabra hablada, iluminación teatral reactiva y escenografía espacial para explorar la tensión entre los sistemas automatizados de habla y la voz humana. Al tratar la voz como materia expresiva y acústica a la vez, la obra pone en escena la poesía, la luz y el procesamiento algorítmico dentro de un mismo entorno inmersivo, y examina cómo las reglas computacionales enmarcan la expresión vocal, la identidad y la presencia corporal dentro de un espacio escénico compartido.',
+  "<em>The Agent</em> è una performance site-specific che unisce parola parlata, illuminazione teatrale reattiva e scenografia spaziale per esplorare la tensione tra i sistemi vocali automatizzati e la voce umana. Trattando la voce come materia espressiva e acustica insieme, l'opera mette in scena poesia, luce ed elaborazione algoritmica in un unico ambiente immersivo, ed esamina come le regole computazionali inquadrino l'espressione vocale, l'identità e la presenza corporea all'interno di uno spazio performativo condiviso.");
 
 // ---------------------------------------------------------------------
 // Shared spec values
@@ -106,19 +115,57 @@ const S = {
 export const home = {
   title: L('Brian Contreras — Tactile Curation', 'Brian Contreras — Curaduría Táctil', 'Brian Contreras — Curatela Tattile'),
   description: L(
-    'Portfolio of Brian Contreras: spatial computing, robotics, spatial audio, and participatory installations that turn digital rules into tactile, social encounters.',
-    'Portafolio de Brian Contreras: computación espacial, robótica, audio espacial e instalaciones participativas que transforman las reglas digitales en encuentros táctiles y sociales.',
-    'Portfolio di Brian Contreras: spatial computing, robotica, audio spaziale e installazioni partecipative che trasformano le regole digitali in incontri tattili e sociali.'),
+    'Portfolio of Brian Contreras, artist and researcher working across media art, spatial computing, language, and participatory experiences.',
+    'Portafolio de Brian Contreras, artista e investigador que trabaja entre el arte de los medios, la computación espacial, el lenguaje y las experiencias participativas.',
+    'Portfolio di Brian Contreras, artista e ricercatore attivo tra media art, spatial computing, linguaggio ed esperienze partecipative.'),
   headline: L(
     'Tactile Curation: Engineering Play, Materiality, and Social Connection in Spatial Computing',
     'Curaduría Táctil: Diseño de Juego, Materialidad y Conexión Social en la Computación Espacial',
     'Curatela Tattile: Progettare il Gioco, la Materialità e la Connessione Sociale nello Spatial Computing'),
+  descriptor: L(
+    'Artist and researcher working across media art, spatial computing, language, and participatory experiences.',
+    'Artista e investigador que trabaja entre el arte de los medios, la computación espacial, el lenguaje y las experiencias participativas.',
+    'Artista e ricercatore attivo tra media art, spatial computing, linguaggio ed esperienze partecipative.'),
+  descriptorSupport: L(
+    'My practice moves between interactive installations, language technologies, and artistic research, treating computation and communication as materials for creating shared experiences.',
+    'Mi práctica transita entre las instalaciones interactivas, las tecnologías del lenguaje y la investigación artística, abordando la computación y la comunicación como materiales para crear experiencias compartidas.',
+    'La mia pratica attraversa installazioni interattive, tecnologie del linguaggio e ricerca artistica, considerando la computazione e la comunicazione come materiali per creare esperienze condivise.'),
   statement: {
     label: L('Artist Statement', 'Declaración Artística', 'Dichiarazione Artistica'),
-    body: L(
-      "Interactive environments and digital architectures shape how people move, behave, and connect when they share physical space. My practice brings the hidden rules of computation into the room through spatial audio, computer vision, and tactile materials. Growing up around my parents' craft as jewelers taught me that technical precision matters most when it serves the human body, a material sensibility I bring to spatial computing and interactive installation design. Grounded in my experience across conversational AI, UX strategy, and game studies, I examine how designed systems govern participation and cultural interpretation. My perspective as a gay Guatemalan also informs my attention to cultural memory and representation, particularly across Central American and wider Latin American contexts. Across my work, from robotics and wearable spatial audio to my current residency at Accademia Unidee (Cittadellarte, Fondazione Pistoletto) in Biella, Italy, where I weave raw sheep's wool with programmable LED matrices, I build multisensory spaces that act as spatial games. As visitors walk through these installations, the architecture reacts to their proximity and movement, inviting strangers to touch, collaborate, and negotiate shared space together.",
-      'Los entornos interactivos y las arquitecturas digitales moldean cómo las personas se mueven, se comportan y se conectan cuando comparten un espacio físico. Mi práctica traslada las reglas invisibles de la computación al espacio físico mediante audio espacial, visión artificial y materiales táctiles. Crecer rodeado del oficio de mis padres como joyeros me enseñó que la precisión técnica cobra mayor sentido cuando sirve al cuerpo humano, una sensibilidad material que aplico a la computación espacial y al diseño de instalaciones interactivas. A partir de mi experiencia en inteligencia artificial conversacional, estrategia de experiencia de usuario y estudios de juegos, analizo cómo los sistemas diseñados regulan la participación y la interpretación cultural. Mi perspectiva como guatemalteco gay también orienta mi atención a la memoria cultural y la representación, especialmente en contextos centroamericanos y latinoamericanos más amplios. En toda mi obra, desde la robótica y el audio espacial portátil hasta mi residencia actual en Accademia Unidee (Cittadellarte, Fondazione Pistoletto) en Biella, Italia, donde tejo lana virgen de oveja con matrices LED programables, construyo espacios multisensoriales que funcionan como juegos espaciales. A medida que los visitantes recorren estas instalaciones, la arquitectura reacciona a su proximidad y movimiento, invitando a desconocidos a tocar, colaborar y negociar juntos el espacio compartido.',
-      "Gli ambienti interattivi e le architetture digitali modellano il modo in cui le persone si muovono, si comportano e si connettono quando condividono lo spazio fisico. La mia pratica porta le regole invisibili della computazione dentro la stanza attraverso l'audio spaziale, la visione artificiale e i materiali tattili. Crescere accanto al mestiere dei miei genitori come gioiellieri mi ha insegnato che la precisione tecnica conta soprattutto quando serve il corpo umano, una sensibilità materiale che porto nello spatial computing e nella progettazione di installazioni interattive. Forte della mia esperienza nell'intelligenza artificiale conversazionale, nella strategia UX e nei game studies, esamino come i sistemi progettati regolino la partecipazione e l'interpretazione culturale. La mia prospettiva di guatemalteco gay orienta anche la mia attenzione verso la memoria culturale e la rappresentazione, in particolare nei contesti centroamericani e latinoamericani più ampi. Attraverso il mio lavoro, dalla robotica e dall'audio spaziale indossabile fino alla mia attuale residenza presso Accademia Unidee (Cittadellarte, Fondazione Pistoletto) a Biella, in Italia, dove intreccio lana grezza di pecora con matrici LED programmabili, costruisco spazi multisensoriali che agiscono come giochi spaziali. Mentre i visitatori attraversano queste installazioni, l'architettura reagisce alla loro prossimità e al loro movimento, invitando gli sconosciuti a toccare, collaborare e negoziare insieme lo spazio condiviso."),
+    body: [
+      L(
+        "Interactive environments and digital architectures shape how people move, behave, and connect when they share physical space. My practice brings the hidden rules of computation into the room through spatial audio, computer vision, and tactile materials. Growing up around my parents' craft as jewelers taught me that technical precision matters most when it serves the human body, a material sensibility I bring to spatial computing and interactive installation design. My work also moves between linguistics, literature, and language technologies. Grounded in my experience across conversational AI, UX strategy, and game studies, I examine how designed systems govern participation, and how voice, writing, translation, and linguistic variation shape the ways people construct meaning and connect across cultural contexts. Language, for me, is both cultural material and interface.",
+        'Los entornos interactivos y las arquitecturas digitales moldean cómo las personas se mueven, se comportan y se conectan cuando comparten un espacio físico. Mi práctica traslada las reglas invisibles de la computación al espacio físico mediante audio espacial, visión artificial y materiales táctiles. Crecer rodeado del oficio de mis padres como joyeros me enseñó que la precisión técnica cobra mayor sentido cuando sirve al cuerpo humano, una sensibilidad material que aplico a la computación espacial y al diseño de instalaciones interactivas. Mi trabajo también se sitúa entre la lingüística, la literatura y las tecnologías del lenguaje. A partir de mi experiencia en inteligencia artificial conversacional, estrategia de experiencia de usuario y estudios de juegos, analizo cómo los sistemas diseñados regulan la participación, y cómo la voz, la escritura, la traducción y la variación lingüística influyen en la manera en que las personas construyen significado y se relacionan entre distintos contextos culturales. Para mí, el lenguaje es a la vez materia cultural e interfaz.',
+        "Gli ambienti interattivi e le architetture digitali modellano il modo in cui le persone si muovono, si comportano e si connettono quando condividono lo spazio fisico. La mia pratica porta le regole invisibili della computazione dentro la stanza attraverso l'audio spaziale, la visione artificiale e i materiali tattili. Crescere accanto al mestiere dei miei genitori come gioiellieri mi ha insegnato che la precisione tecnica conta soprattutto quando serve il corpo umano, una sensibilità materiale che porto nello spatial computing e nella progettazione di installazioni interattive. Il mio lavoro attraversa anche la linguistica, la letteratura e le tecnologie del linguaggio. Forte della mia esperienza nell'intelligenza artificiale conversazionale, nella strategia UX e nei game studies, esamino come i sistemi progettati regolino la partecipazione, e come voce, scrittura, traduzione e variazione linguistica influenzino la costruzione del significato e le relazioni tra contesti culturali diversi. Per me, il linguaggio è al tempo stesso materia culturale e interfaccia."),
+      L(
+        "My perspective as a gay Guatemalan also informs my attention to cultural memory and representation, particularly across Central American and wider Latin American contexts. Across my work, from robotics and wearable spatial audio to my current residency at Accademia Unidee (Cittadellarte, Fondazione Pistoletto) in Biella, Italy, where I weave raw sheep's wool with programmable LED matrices, I build multisensory spaces that act as spatial games. As visitors walk through these installations, the architecture reacts to their proximity and movement, inviting strangers to touch, collaborate, and negotiate shared space together.",
+        'Mi perspectiva como guatemalteco gay también orienta mi atención a la memoria cultural y la representación, especialmente en contextos centroamericanos y latinoamericanos más amplios. En toda mi obra, desde la robótica y el audio espacial portátil hasta mi residencia actual en Accademia Unidee (Cittadellarte, Fondazione Pistoletto) en Biella, Italia, donde tejo lana virgen de oveja con matrices LED programables, construyo espacios multisensoriales que funcionan como juegos espaciales. A medida que los visitantes recorren estas instalaciones, la arquitectura reacciona a su proximidad y movimiento, invitando a desconocidos a tocar, colaborar y negociar juntos el espacio compartido.',
+        "La mia prospettiva di guatemalteco gay orienta anche la mia attenzione verso la memoria culturale e la rappresentazione, in particolare nei contesti centroamericani e latinoamericani più ampi. Attraverso il mio lavoro, dalla robotica e dall'audio spaziale indossabile fino alla mia attuale residenza presso Accademia Unidee (Cittadellarte, Fondazione Pistoletto) a Biella, in Italia, dove intreccio lana grezza di pecora con matrici LED programmabili, costruisco spazi multisensoriali che agiscono come giochi spaziali. Mentre i visitatori attraversano queste installazioni, l'architettura reagisce alla loro prossimità e al loro movimento, invitando gli sconosciuti a toccare, collaborare e negoziare insieme lo spazio condiviso."),
+    ],
+    // three complementary dimensions: conceptual groupings, not categories
+    practices: [
+      {
+        title: L('Material and spatial', 'Material y espacial', 'Materiale e spaziale'),
+        text: L(
+          'Interactive installations, spatial computing, participatory experiences, and experimental media art.',
+          'Instalaciones interactivas, computación espacial, experiencias participativas y arte de los medios experimental.',
+          'Installazioni interattive, spatial computing, esperienze partecipative e media art sperimentale.'),
+      },
+      {
+        title: L('Language and narrative', 'Lenguaje y narrativa', 'Linguaggio e narrazione'),
+        text: L(
+          'Linguistics, literature, spoken word, localization, conversation, translation, and storytelling.',
+          'Lingüística, literatura, palabra hablada, localización, conversación, traducción y narración.',
+          'Linguistica, letteratura, spoken word, localizzazione, conversazione, traduzione e narrazione.'),
+      },
+      {
+        title: L('Computational and interactive', 'Computacional e interactiva', 'Computazionale e interattiva'),
+        text: L(
+          'Human-computer interaction, AI, language technologies, game mechanics, and digital systems.',
+          'Interacción persona-computadora, inteligencia artificial, tecnologías del lenguaje, mecánicas de juego y sistemas digitales.',
+          'Interazione uomo-macchina, intelligenza artificiale, tecnologie del linguaggio, meccaniche di gioco e sistemi digitali.'),
+      },
+    ],
     headshotAlt: L('Portrait of Brian Contreras', 'Retrato de Brian Contreras', 'Ritratto di Brian Contreras'),
   },
   works: [
@@ -135,10 +182,8 @@ export const home = {
     {
       slug: 'the-agent', index: '03', preview: 'agent-performance.png',
       title: L('<em>The Agent</em>: Acoustic Automation and Biological Voice', '<em>The Agent</em>: Automatización Acústica y Voz Biológica', '<em>The Agent</em>: Automazione Acustica e Voce Biologica'),
-      body: L(
-        '<em>The Agent</em> is a site-specific performance combining spoken word, reactive theatrical lighting, and spatial scenography to explore the tension between automated speech systems and the human voice. By staging algorithmic processing as an immersive acoustic and visual environment, the work examines how computational rules frame vocal expression, identity, and bodily presence inside a shared performance space.',
-        '<em>The Agent</em> es una performance específica para el espacio que combina palabra hablada, iluminación teatral reactiva y escenografía espacial para explorar la tensión entre los sistemas automatizados de habla y la voz humana. Al presentar el procesamiento algorítmico como un entorno acústico y visual inmersivo, la obra examina cómo las reglas computacionales enmarcan la expresión vocal, la identidad y la presencia corporal dentro de un espacio escénico compartido.',
-        "<em>The Agent</em> è una performance site-specific che unisce parola parlata, illuminazione teatrale reattiva e scenografia spaziale per esplorare la tensione tra i sistemi vocali automatizzati e la voce umana. Mettendo in scena l'elaborazione algoritmica come un ambiente acustico e visivo immersivo, l'opera esamina come le regole computazionali inquadrino l'espressione vocale, l'identità e la presenza corporea all'interno di uno spazio performativo condiviso."),
+      voice: AGENT_VOICE,
+      body: AGENT_BODY,
       specs: S.agent,
       cta: L('View Performance Video and Scenography →', 'Ver Video de la Performance y Escenografía →', 'Guarda il Video della Performance e la Scenografia →'),
     },
@@ -186,9 +231,16 @@ export const home = {
   systems: {
     label: L('Language and Platforms: Scaling Linguistic and Educational Infrastructure', 'Lenguaje y Plataformas: Escalando Infraestructuras Lingüísticas y Educativas', 'Linguaggio e Piattaforme: Scalare le Infrastrutture Linguistiche ed Educative'),
     body: L(
-      "At Amazon Alexa, I built localization workflows for the platform's inaugural Spanish and Italian launches, mapping regional colloquialisms to standardized intent categories for natural language understanding. At Vista Higher Learning, I served as a Developmental Editor for European Languages, guiding the transformation of print language textbooks into interactive virtual learning platforms. Alongside my work directing bilingual voice-interface design at Versay Solutions, my work with NRI focused on interactivity and government-to-public communication, while my work at Red Trig examined AI platform governance. Together, these roles revealed how linguistic taxonomies and interface rules determine how people learn, speak, and participate across digital systems.",
-      'En Amazon Alexa, desarrollé flujos de localización para los lanzamientos inaugurales de la plataforma en español e italiano, vinculando expresiones coloquiales regionales con categorías de intención estandarizadas para la comprensión del lenguaje natural. En Vista Higher Learning, trabajé como editor de desarrollo para lenguas europeas y guié la transformación de libros de texto impresos en plataformas virtuales de aprendizaje interactivo. Además de dirigir el diseño de interfaces de voz bilingües en Versay Solutions, mi trabajo con NRI se centró en la interactividad y la comunicación del gobierno con el público, mientras que en Red Trig investigué la gobernanza de plataformas de inteligencia artificial. En conjunto, estas experiencias mostraron cómo las taxonomías lingüísticas y las reglas de interfaz determinan cómo las personas aprenden, hablan y participan en los sistemas digitales.',
-      "In Amazon Alexa ho sviluppato flussi di localizzazione per i lanci iniziali della piattaforma in spagnolo e italiano, collegando espressioni colloquiali regionali a categorie di intento standardizzate per la comprensione del linguaggio naturale. Presso Vista Higher Learning ho lavorato come Developmental Editor per le lingue europee, seguendo la trasformazione dei libri di testo cartacei in piattaforme virtuali di apprendimento interattivo. Oltre a dirigere la progettazione di interfacce vocali bilingui presso Versay Solutions, il mio lavoro con NRI si è concentrato sull'interattività e sulla comunicazione del governo rivolta al pubblico, mentre presso Red Trig mi sono occupato della governance delle piattaforme di intelligenza artificiale. Nel complesso, queste esperienze hanno mostrato come le tassonomie linguistiche e le regole delle interfacce determinino il modo in cui le persone apprendono, parlano e partecipano ai sistemi digitali."),
+      "Language has run through my professional work as both a linguistic system and a social practice. At Amazon Alexa, I built localization workflows for the platform's inaugural Spanish and Italian launches, mapping regional colloquialisms to standardized intent categories for natural language understanding. At Versay Solutions, I directed bilingual design for conversational voice interfaces. At Vista Higher Learning, I served as a Developmental Editor for European Languages, guiding the transformation of print language textbooks into interactive virtual learning platforms. My work with NRI focused on interactivity and government-to-public communication, while my work at Red Trig examined AI platform governance. Together, these roles revealed how linguistic taxonomies, interfaces, and communication systems shape who can learn, speak, and participate across digital environments.",
+      'El lenguaje ha atravesado mi trabajo profesional como sistema lingüístico y como práctica social. En Amazon Alexa, desarrollé flujos de localización para los lanzamientos inaugurales de la plataforma en español e italiano, vinculando expresiones coloquiales regionales con categorías de intención estandarizadas para la comprensión del lenguaje natural. En Versay Solutions, dirigí el diseño bilingüe de interfaces conversacionales de voz. En Vista Higher Learning, trabajé como editor de desarrollo para lenguas europeas y guié la transformación de libros de texto impresos en plataformas virtuales de aprendizaje interactivo. Mi trabajo con NRI se centró en la interactividad y la comunicación del gobierno con el público, mientras que en Red Trig investigué la gobernanza de plataformas de inteligencia artificial. En conjunto, estas experiencias mostraron cómo las taxonomías lingüísticas, las interfaces y los sistemas de comunicación determinan quién puede aprender, hablar y participar en los entornos digitales.',
+      "Il linguaggio ha attraversato il mio lavoro professionale come sistema linguistico e come pratica sociale. In Amazon Alexa ho sviluppato flussi di localizzazione per i lanci iniziali della piattaforma in spagnolo e italiano, collegando espressioni colloquiali regionali a categorie di intento standardizzate per la comprensione del linguaggio naturale. Presso Versay Solutions ho diretto la progettazione bilingue di interfacce vocali conversazionali. Presso Vista Higher Learning ho lavorato come Developmental Editor per le lingue europee, seguendo la trasformazione dei libri di testo cartacei in piattaforme virtuali di apprendimento interattivo. Il mio lavoro con NRI si è concentrato sull'interattività e sulla comunicazione del governo rivolta al pubblico, mentre presso Red Trig mi sono occupato della governance delle piattaforme di intelligenza artificiale. Nel complesso, queste esperienze hanno mostrato come le tassonomie linguistiche, le interfacce e i sistemi di comunicazione determinino chi può apprendere, parlare e partecipare negli ambienti digitali."),
+    // linguistic marginalia: a small typographic study, not a project claim
+    terms: [
+      ['VOICE', 'VOZ', 'VOCE'],
+      ['TEXT', 'TEXTO', 'TESTO'],
+      ['NARRATIVE', 'NARRATIVA', 'NARRAZIONE'],
+      ['TRANSLATION', 'TRADUCCIÓN', 'TRADUZIONE'],
+    ],
     figs: [
       { src: 'misc-amazon-alexa.png', cap: L('Natural language data and localization workflows for Amazon Alexa.', 'Datos de lenguaje natural y flujos de localización para Amazon Alexa.', 'Dati sul linguaggio naturale e flussi di localizzazione per Amazon Alexa.') },
       { src: 'misc-language-textbooks.png', cap: L('Published language textbooks and interactive digital curricula developed at Vista Higher Learning.', 'Libros de texto publicados y currículos digitales interactivos desarrollados en Vista Higher Learning.', 'Libri di testo pubblicati e programmi digitali interattivi sviluppati presso Vista Higher Learning.') },
@@ -196,18 +248,18 @@ export const home = {
     ],
   },
   ludology: {
-    label: L('Platforms and Play: Ludological Rulesets and Spatial Interaction', 'Plataformas y Juego: Reglas Ludológicas e Interacción Espacial', 'Piattaforme e Gioco: Regole Ludologiche e Interazione Spaziale'),
+    label: L('Platforms and Play: Ludology, Narrative, and Spatial Interaction', 'Plataformas y Juego: Ludología, Narrativa e Interacción Espacial', 'Piattaforme e Gioco: Ludologia, Narrazione e Interazione Spaziale'),
     body: L(
-      "My Erasmus Mundus Joint Master's thesis, <em>Pokémon Phenomenon: Game Mechanics and its Effect on Narratives</em>, analyzed how interactive rules and game mechanics steer storytelling and social exchange across the Pokémon media universe. By examining how location-locked assets and structural rules guide player behavior and community collaboration, this research establishes the theoretical foundation for my current practice: treating room-scale installations as spatial games where aesthetics, sensors, and physical boundaries invite people to play and connect.",
-      'Mi tesis de Maestría Conjunta Erasmus Mundus, <em>Pokémon Phenomenon: Game Mechanics and its Effect on Narratives</em>, analizó cómo las reglas interactivas y las mecánicas de juego dirigen la narrativa y el intercambio social en el universo mediático de Pokémon. Al examinar cómo los elementos vinculados a ubicaciones y las reglas estructurales guían el comportamiento de los jugadores y la colaboración comunitaria, esta investigación establece la base teórica de mi práctica actual: concebir las instalaciones a escala de sala como juegos espaciales donde la estética, los sensores y los límites físicos invitan al público a jugar y conectarse.',
-      'La mia tesi di Laurea Magistrale Congiunta Erasmus Mundus, <em>Pokémon Phenomenon: Game Mechanics and its Effect on Narratives</em>, ha analizzato come le regole interattive e le meccaniche di gioco guidino la narrazione e lo scambio sociale nell\'universo mediale di Pokémon. Esaminando come le risorse legate alla posizione geografica e le regole strutturali orientino il comportamento dei giocatori e la collaborazione della comunità, questa ricerca stabilisce la base teorica per la mia pratica attuale: trattare le installazioni su scala ambientale come giochi spaziali in cui estetica, sensori e confini fisici invitano le persone a giocare e connettersi.'),
+      "My Erasmus Mundus Joint Master's thesis, <em>Pokémon Phenomenon: Game Mechanics and its Effect on Narratives</em>, is interdisciplinary research connecting game mechanics with narrative structures. It analyzed how interactive rules steer storytelling and social exchange as the Pokémon universe moves across media and popular culture. By examining how location-locked assets and structural rules guide player behavior and community collaboration, this research establishes the theoretical foundation for my current practice: treating room-scale installations as spatial games where aesthetics, sensors, and physical boundaries invite people to play and connect.",
+      'Mi tesis de Maestría Conjunta Erasmus Mundus, <em>Pokémon Phenomenon: Game Mechanics and its Effect on Narratives</em>, es una investigación interdisciplinaria que conecta las mecánicas de juego con las estructuras narrativas. Analizó cómo las reglas interactivas dirigen la narrativa y el intercambio social a medida que el universo Pokémon se desplaza entre distintos medios y la cultura popular. Al examinar cómo los elementos vinculados a ubicaciones y las reglas estructurales guían el comportamiento de los jugadores y la colaboración comunitaria, esta investigación establece la base teórica de mi práctica actual: concebir las instalaciones a escala de sala como juegos espaciales donde la estética, los sensores y los límites físicos invitan al público a jugar y conectarse.',
+      "La mia tesi di Laurea Magistrale Congiunta Erasmus Mundus, <em>Pokémon Phenomenon: Game Mechanics and its Effect on Narratives</em>, è una ricerca interdisciplinare che collega le meccaniche di gioco alle strutture narrative. Ha analizzato come le regole interattive guidino la narrazione e lo scambio sociale mentre l'universo Pokémon attraversa media diversi e la cultura popolare. Esaminando come le risorse legate alla posizione geografica e le regole strutturali orientino il comportamento dei giocatori e la collaborazione della comunità, questa ricerca stabilisce la base teorica per la mia pratica attuale: trattare le installazioni su scala ambientale come giochi spaziali in cui estetica, sensori e confini fisici invitano le persone a giocare e connettersi."),
   },
   publications: {
     label: L('Written Work and Academic Publications', 'Obra Escrita y Publicaciones Académicas', 'Opere Scritte e Pubblicazioni Accademiche'),
     intro: L(
-      'My scholarship bridges human-computer interaction, media arts, game studies, and cultural history. The following selected works anchor my research practice:',
-      'Mi investigación une la interacción persona-computadora, las artes mediáticas, los estudios de juegos y la historia cultural. Los siguientes trabajos seleccionados sustentan mi práctica investigadora:',
-      "La mia ricerca unisce l'interazione uomo-macchina, le arti mediali, i game studies e la storia culturale. I seguenti lavori selezionati sostengono la mia pratica di ricerca:"),
+      'My writing moves between media art history, cultural history, and theory, approaching computational aesthetics and digital culture as subjects of interpretation and critique as well as of design. The following selected works anchor my research practice:',
+      'Mi escritura transita entre la historia del arte de los medios, la historia cultural y la teoría, y aborda la estética computacional y la cultura digital como objetos de interpretación y de crítica, además de diseño. Los siguientes trabajos seleccionados sustentan mi práctica investigadora:',
+      "La mia scrittura si muove tra la storia della media art, la storia culturale e la teoria, affrontando l'estetica computazionale e la cultura digitale come oggetti di interpretazione e di critica, oltre che di progettazione. I seguenti lavori selezionati sostengono la mia pratica di ricerca:"),
     // PDF links intentionally omitted for now. Add `href` to an item to link it.
     items: [
       {
@@ -252,9 +304,9 @@ export const home = {
   coda: {
     label: L('Coda', 'Coda', 'Coda'),
     body: L(
-      'I study computation through the human encounters it shapes: walking into a room, hearing a familiar voice, touching a luminous textile, and coordinating movement with a stranger. By turning digital rules into tactile, sonic, and spatial experiences, my work explores how immersive environments can foster curiosity, wonder, and shared human connection.',
-      'Estudio la computación a través de los encuentros humanos que configura: entrar en una sala, escuchar una voz familiar, tocar un textil luminoso y coordinar el movimiento con un desconocido. Al transformar las reglas digitales en experiencias táctiles, sonoras y espaciales, mi obra explora cómo los entornos inmersivos pueden despertar la curiosidad, el asombro y la conexión humana compartida.',
-      'Studio la computazione attraverso gli incontri umani che modella: entrare in una stanza, ascoltare una voce familiare, toccare un tessuto luminoso e coordinare il movimento con uno sconosciuto. Trasformando le regole digitali in esperienze tattili, sonore e spaziali, il mio lavoro esplora come gli ambienti immersivi possano favorire la curiosità, la meraviglia e la connessione umana condivisa.'),
+      'I study computation through the human encounters it shapes: walking into a room, hearing a familiar voice, finding a word in another language, touching a luminous textile, and coordinating movement with a stranger. By turning digital rules into tactile, sonic, and spatial experiences, my work explores how immersive environments can foster curiosity, wonder, and shared human connection.',
+      'Estudio la computación a través de los encuentros humanos que configura: entrar en una sala, escuchar una voz familiar, encontrar una palabra en otro idioma, tocar un textil luminoso y coordinar el movimiento con un desconocido. Al transformar las reglas digitales en experiencias táctiles, sonoras y espaciales, mi obra explora cómo los entornos inmersivos pueden despertar la curiosidad, el asombro y la conexión humana compartida.',
+      "Studio la computazione attraverso gli incontri umani che modella: entrare in una stanza, ascoltare una voce familiare, trovare una parola in un'altra lingua, toccare un tessuto luminoso e coordinare il movimento con uno sconosciuto. Trasformando le regole digitali in esperienze tattili, sonore e spaziali, il mio lavoro esplora come gli ambienti immersivi possano favorire la curiosità, la meraviglia e la connessione umana condivisa."),
   },
 };
 
@@ -321,11 +373,8 @@ export const projects = [
     hero: { src: 'agent-performance.png', cap: L('Live spoken-word performance at Ars Electronica Festival, Linz, 2023.', 'Performance de palabra hablada en vivo en el Festival Ars Electronica, Linz, 2023.', "Performance spoken word dal vivo all'Ars Electronica Festival, Linz, 2023.") },
     sections: [
       {
-        num: '03.1', heading: about, specs: S.agent,
-        body: L(
-          '<em>The Agent</em> is a site-specific performance combining spoken word, reactive theatrical lighting, and spatial scenography to explore the tension between automated speech systems and the human voice. By staging algorithmic processing as an immersive acoustic and visual environment, the work examines how computational rules frame vocal expression, identity, and bodily presence inside a shared performance space.',
-          '<em>The Agent</em> es una performance específica para el espacio que combina palabra hablada, iluminación teatral reactiva y escenografía espacial para explorar la tensión entre los sistemas automatizados de habla y la voz humana. Al presentar el procesamiento algorítmico como un entorno acústico y visual inmersivo, la obra examina cómo las reglas computacionales enmarcan la expresión vocal, la identidad y la presencia corporal dentro de un espacio escénico compartido.',
-          "<em>The Agent</em> è una performance site-specific che unisce parola parlata, illuminazione teatrale reattiva e scenografia spaziale per esplorare la tensione tra i sistemi vocali automatizzati e la voce umana. Mettendo in scena l'elaborazione algoritmica come un ambiente acustico e visivo immersivo, l'opera esamina come le regole computazionali inquadrino l'espressione vocale, l'identità e la presenza corporea all'interno di uno spazio performativo condiviso."),
+        num: '03.1', heading: about, specs: S.agent, voice: AGENT_VOICE,
+        body: AGENT_BODY,
       },
     ],
     gallery: [

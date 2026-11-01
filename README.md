@@ -27,7 +27,10 @@ domain, update `SITE_URL` in `build/content.mjs` and rebuild. The build stops if
 copy contains an ampersand, and it warns about missing or unused files in
 `media/`.
 
-- `assets/style.css`: Day/Night themes (CSS custom properties), layout, figures
+- `assets/style.css`: Day/Night themes and the prism colour system (CSS custom
+  properties), layout, figures. Each section's colour is set once, in the
+  `[data-section]` / `[data-active]` rules near the top; the home page blocks and
+  the project pages carry the matching `data-section` number.
 - `assets/site.js`: theme and language switching, keyboard navigation,
   lightbox, Copy Email, hover previews
 - `media/`: images; looping clips are `.mp4` with a matching `.jpg` poster
@@ -35,6 +38,8 @@ copy contains an ampersand, and it warns about missing or unused files in
 ## Keyboard
 
 `J`/`K` or `↑`/`↓` step through sections · `←`/`→` move between figures ·
-`Enter`/`Space` open a figure · `T` Day/Night · `L` EN → ES → IT ·
+`Enter`/`Space` open a figure (or, on the hero, release the greeting) ·
+`1` Day/Night · `2` EN → ES → IT (number row or keypad; shown as small keycaps
+beside the controls on keyboard devices) ·
 `Esc` closes the viewer, or (like `Backspace`) returns to the index from a
 project page.

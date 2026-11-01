@@ -3,11 +3,14 @@
    - Day / Night theme (saved; follows the system until chosen)
    - EN / ES / IT: each language has its own page; switching swaps text
      in place and moves the address bar to the matching page
-   - woven-grid hero: a small generative artwork that answers the pointer
+   - woven-grid hero: a small generative artwork that answers the pointer;
+     a click releases a spectral wave and six multilingual greetings
+   - section colours: <html data-active> follows the section in view, so
+     the rail, navigation and other indicators take on its prism colour
    - section rail, active navigation, footer signature of visited sections
    - index previews on hover and keyboard focus (and in view on touch)
-   - keyboard: J/K or Up/Down sections, Left/Right figures, T theme,
-     L language, Esc or Backspace back to the index from a project page
+   - keyboard: 1 Day/Night, 2 EN → ES → IT, J/K or Up/Down sections,
+     Left/Right figures, Esc or Backspace back to the index from a project page
    - accessible lightbox (never enlarges an image beyond its own size)
    ===================================================================== */
 (function () {
@@ -15,7 +18,6 @@
 
   var doc = document, root = doc.documentElement;
   var LANGS = ['en', 'es', 'it'];
-  var ACCENTS = ['teal', 'pink', 'yellow'];
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   var isProject = doc.body.classList.contains('is-project');
@@ -150,9 +152,13 @@
       var ptr = { x: -1e4, y: -1e4, sx: -1e4, sy: -1e4, on: false, e: 0 };
       var pulses = [], lastPulse = 0;
       var lit = [], section = 0, running = false, visible = true, raf = 0, t0 = performance.now();
-      var SPEC = ['s-teal', 's-cyan', 's-blue', 's-violet', 's-magenta', 's-pink', 's-coral', 's-amber'];
-      var LANG_OFF = { en: 0, es: 6, it: 3 };
+      /* the full prism, in the order the sections run through it */
+      var SPEC = ['prism-coral', 'prism-orange', 'prism-amber', 'prism-chartreuse', 'prism-teal', 'prism-cyan',
+        'prism-blue', 'prism-indigo', 'prism-violet', 'prism-magenta', 'prism-rose'];
+      var NS = SPEC.length;
+      var LANG_OFF = { en: 4, es: 0, it: 8 };
       var waves = [], WLIFE = 1150, WSPEED = 0.56, wrap = fig.parentNode;
+      var traces = [], TLIFE = 2600;
 
       function hex(c) {
         c = c.trim();
@@ -166,11 +172,11 @@
       }
       function readPalette() {
         var cs = getComputedStyle(root), p = {};
-        ['ink', 'mat', 'teal', 'pink', 'yellow', 'border-color', 'la', 'lb'].concat(SPEC).forEach(function (k) { p[k] = hex(cs.getPropertyValue('--' + k)); });
+        ['ink', 'mat', 'border-color', 'la', 'lb', 'prism-yellow'].concat(SPEC).forEach(function (k) { p[k] = hex(cs.getPropertyValue('--' + k)); });
         return p;
       }
       /* the spectrum, rotated so each language starts from its own colour */
-      function spec(i) { return pal[SPEC[(((i + LANG_OFF[lang]) % 8) + 8) % 8]]; }
+      function spec(i) { return pal[SPEC[(((i + LANG_OFF[lang]) % NS) + NS) % NS]]; }
       function rgba(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a.toFixed(3) + ')'; }
       function mix(dst, src, k) { for (var key in src) for (var i = 0; i < 3; i++) dst[key][i] += (src[key][i] - dst[key][i]) * k; }
 
@@ -252,7 +258,7 @@
         var tl = reduce ? 0 : t;   /* with reduced motion the light holds still */
         var lx = W * (0.32 + 0.22 * Math.sin(tl * 0.00006)), ly = H * (0.42 + 0.2 * Math.cos(tl * 0.00005));
         var g = ctx.createRadialGradient(lx, ly, 0, lx, ly, Math.max(W, H) * 0.65);
-        var acc = p[ACCENTS[section % 3]];
+        var acc = p.la;
         g.addColorStop(0, rgba(acc, 0.16)); g.addColorStop(1, rgba(acc, 0));
         ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
@@ -333,7 +339,7 @@
           ctx.lineWidth = 1.15;
           for (var q1 = 0; q1 < 16; q1++) {
             if (!buckets[q1]) continue;
-            ctx.strokeStyle = rgba(spec(q1 >> 1), (q1 & 1 ? 0.85 : 0.4) * Math.min(1, ptr.e * 1.2));
+            ctx.strokeStyle = rgba(spec(Math.round((q1 >> 1) * NS / 8)), (q1 & 1 ? 0.85 : 0.4) * Math.min(1, ptr.e * 1.2));
             ctx.stroke(buckets[q1]);
           }
         }
@@ -359,21 +365,21 @@
                 var n2 = s2 ? idx + 1 : idx + rows;
                 var mx2 = (X[idx] + X[n2]) / 2 - Wv.x, my2 = (Y[idx] + Y[n2]) / 2 - Wv.y, dm = Math.sqrt(mx2 * mx2 + my2 * my2);
                 if (Math.abs(dm - wr) > band) continue;
-                var ci = (Math.floor(dm / 38) + shift) % 8;
+                var ci = (Math.floor(dm / 38) + shift) % NS;
                 if (!wb[ci]) wb[ci] = new Path2D();
                 wb[ci].moveTo(X[idx], Y[idx]); wb[ci].lineTo(X[n2], Y[n2]);
               }
             }
           }
           ctx.lineWidth = 1.5;
-          for (var c2 = 0; c2 < 8; c2++) if (wb[c2]) { ctx.strokeStyle = rgba(spec(c2), 0.85 * ease); ctx.stroke(wb[c2]); }
+          for (var c2 = 0; c2 < NS; c2++) if (wb[c2]) { ctx.strokeStyle = rgba(spec(c2), 0.85 * ease); ctx.stroke(wb[c2]); }
           /* intersections illuminate in sequence as the front reaches them */
           for (i = 0; i < cols; i++) {
             for (j = 0; j < rows; j++) {
               idx = i * rows + j;
               var ix = X[idx] - Wv.x, iy = Y[idx] - Wv.y, di = Math.sqrt(ix * ix + iy * iy), gap = Math.abs(di - wr);
               if (gap > 16) continue;
-              ctx.fillStyle = rgba(spec((Math.floor(di / 38) + shift) % 8), ease * (1 - gap / 16));
+              ctx.fillStyle = rgba(spec(Math.floor(di / 38) + shift), ease * (1 - gap / 16));
               ctx.fillRect(X[idx] - 2.5, Y[idx] - 2.5, 5, 5);
             }
           }
@@ -387,7 +393,7 @@
           if (L.i >= cols || L.j >= rows) continue;
           idx = L.i * rows + L.j;
           /* mostly the language pair and the section accent, with a few spectral notes */
-          var col = k % 4 === 0 ? spec(k * 3) : k % 4 === 1 ? p.la : k % 4 === 2 ? p.lb : p[ACCENTS[section % 3]];
+          var col = k % 4 === 0 ? spec(k * 3) : k % 4 === 1 ? p.la : k % 4 === 2 ? p.lb : spec(section + k);
           var glow = reduce ? 0.8 : 0.55 + 0.4 * Math.sin(t * 0.0011 + L.ph);
           ctx.fillStyle = rgba(col, glow);
           ctx.fillRect(X[idx] - 2.5, Y[idx] - 2.5, 5, 5);
@@ -399,10 +405,34 @@
               var n = near(X[idx], Y[idx], 70);
               if (n > 0.15) {
                 var hb2 = Math.floor(((Math.atan2(Y[idx] - ptr.sy, X[idx] - ptr.sx) + Math.PI) / (2 * Math.PI)) * 8) % 8;
-                ctx.fillStyle = rgba(spec(hb2), n); ctx.fillRect(X[idx] - 2, Y[idx] - 2, 4, 4);
+                ctx.fillStyle = rgba(spec(Math.round(hb2 * NS / 8)), n); ctx.fillRect(X[idx] - 2, Y[idx] - 2, 4, 4);
               }
             }
           }
+        }
+
+        /* a greeting's punctuation lights the threads at its crossing; once the
+           words fade the grid keeps a very faint spectral trace for a moment */
+        for (var tr = traces.length - 1; tr >= 0; tr--) {
+          var T = traces[tr], tage = t - T.t0;
+          if (tage > TLIFE) { traces.splice(tr, 1); continue; }
+          if (tage < 0 || T.i < 2 || T.j < 2 || T.i > cols - 3 || T.j > rows - 3) continue;
+          var tin = Math.min(1, tage / 180), tout = 1 - tage / TLIFE, ta = 0.9 * tin * tout * tout;
+          var tc = p[T.c] || p.la;
+          ctx.lineWidth = 1.5;
+          for (var arm = -2; arm < 2; arm++) {
+            var fall = arm < 0 ? (3 + arm) / 3 : (2 - arm) / 3;   /* brightest at the crossing */
+            ctx.strokeStyle = rgba(tc, ta * fall);
+            var h1 = (T.i + arm) * rows + T.j, h2 = (T.i + arm + 1) * rows + T.j;
+            var v1 = T.i * rows + T.j + arm, v2 = T.i * rows + T.j + arm + 1;
+            ctx.beginPath();
+            ctx.moveTo(X[h1], Y[h1]); ctx.lineTo(X[h2], Y[h2]);
+            ctx.moveTo(X[v1], Y[v1]); ctx.lineTo(X[v2], Y[v2]);
+            ctx.stroke();
+          }
+          idx = T.i * rows + T.j;
+          ctx.fillStyle = rgba(tc, Math.min(1, ta * 1.2));
+          ctx.fillRect(X[idx] - 2.5, Y[idx] - 2.5, 5, 5);
         }
 
         /* signals travelling along a thread */
@@ -454,7 +484,7 @@
           if (now - lastPulse > 650) {
             lastPulse = now;
             var j = Math.max(0, Math.min(rows - 1, Math.round((ptr.y - oy) / sp)));
-            var c = ACCENTS[(section + pulses.length) % 3];
+            var c = pulses.length % 4 ? 'la' : 'lb';
             pulses.push({ j: j, x: ptr.x, dir: 1, t0: now - t0, c: c }, { j: j, x: ptr.x, dir: -1, t0: now - t0, c: c });
             if (pulses.length > 8) pulses.splice(0, 2);
           }
@@ -476,7 +506,90 @@
           kick();
         }
         if (wrap && wrap.classList) wrap.classList.add('has-played');
+        greet(x, y);
       }
+
+      /* ---- six multilingual greetings ----
+         Shown in all three languages whatever the page language. Words and
+         punctuation are separate spans so the punctuation takes its own colour.
+         The first group emerges near the point of touch, the second farther out;
+         each settles on a grid crossing, stays inside the artwork, and the
+         layer is cleared when they have faded. A new click restarts it. */
+      var GREETINGS = [
+        { cls: 'hello', lang: 'en', parts: ['Hello', '!'], punct: 'prism-cyan' },
+        { cls: 'hola', lang: 'es', parts: ['¡', 'Hola', '!'], punct: 'prism-amber' },
+        { cls: 'ciao', lang: 'it', parts: ['Ciao', '!'], punct: 'prism-violet' },
+        { cls: 'welcome', lang: 'en', parts: ['Welcome', '!'], punct: 'prism-rose' },
+        { cls: 'bienvenidos', lang: 'es', parts: ['¡', 'Bienvenidos', '!'], punct: 'prism-yellow' },
+        { cls: 'benvenuti', lang: 'it', parts: ['Benvenuti', '!'], punct: 'prism-coral' }
+      ];
+      var layer = fig.querySelector('.greet');
+      var status = wrap && wrap.querySelector ? wrap.querySelector('.greet-status') : null;
+      var greetTimer = 0, greetCount = 0, lastSaid = 0;
+
+      function greet(x, y) {
+        if (!layer || W < 40 || H < 40) return;
+        clearTimeout(greetTimer);
+        layer.textContent = '';   /* repeated clicks restart rather than accumulate */
+        greetCount++;
+        var gs = Math.max(13, Math.min(26, W * 0.042));
+        layer.style.setProperty('--gs', gs.toFixed(1) + 'px');
+        var pad = 12, placed = [], now = performance.now() - t0;
+        var turn = greetCount * 0.9 + (x / W) * 1.3;   /* vary the composition between clicks */
+        GREETINGS.forEach(function (g, n) {
+          var el = doc.createElement('span');
+          el.className = 'gw gw--' + g.cls;
+          el.lang = g.lang;
+          g.parts.forEach(function (part) {
+            var s = doc.createElement('span');
+            s.textContent = part;
+            if (part === '!' || part === '¡') s.className = 'gp';
+            el.appendChild(s);
+          });
+          layer.appendChild(el);
+          var w = el.offsetWidth, h = el.offsetHeight;
+          var group = n < 3 ? 0 : 1, k = n % 3;
+          var r = Math.min(W, H) * (group ? 0.37 : 0.2);
+          var best = null;
+          for (var tries = 0; tries < 18; tries++) {
+            var ang = turn + group * Math.PI / 3 + k * (2 * Math.PI / 3) + (tries ? (tries % 2 ? 1 : -1) * Math.ceil(tries / 2) * 0.33 : 0);
+            var rr = r * (tries > 9 ? 1.25 : 1);
+            var gi = Math.round((x + Math.cos(ang) * rr - ox) / sp), gj = Math.round((y + Math.sin(ang) * rr - oy) / sp);
+            var ax = ox + gi * sp, ay = oy + gj * sp;
+            /* the word sits just above-right of its crossing, clamped inside the artwork */
+            var bx = Math.max(pad, Math.min(W - w - pad, ax - w * 0.2));
+            var by = Math.max(pad, Math.min(H - h - pad, ay - h * 0.85));
+            var box = { x: bx, y: by, w: w, h: h, gi: gi, gj: gj };
+            var hit = placed.some(function (o) {
+              return !(box.x + box.w + 8 < o.x || o.x + o.w + 8 < box.x || box.y + box.h + 4 < o.y || o.y + o.h + 4 < box.y);
+            });
+            if (!best) best = box;
+            if (!hit) { best = box; break; }
+          }
+          placed.push(best);
+          var dirx = best.x + w / 2 - x, diry = best.y + h / 2 - y, dl = Math.sqrt(dirx * dirx + diry * diry) || 1;
+          var delay = reduce ? 0 : (group ? 520 : 110) + k * 90;
+          el.style.setProperty('--x', best.x.toFixed(1) + 'px');
+          el.style.setProperty('--y', best.y.toFixed(1) + 'px');
+          el.style.setProperty('--dx', (dirx / dl * 5).toFixed(1) + 'px');
+          el.style.setProperty('--dy', (diry / dl * 5 - 2).toFixed(1) + 'px');
+          el.style.setProperty('--d', delay + 'ms');
+          if (!reduce) {
+            var ci = Math.max(0, Math.min(cols - 1, best.gi)), cj = Math.max(0, Math.min(rows - 1, best.gj));
+            traces.push({ i: ci, j: cj, c: g.punct, t0: now + delay + 300 });
+            if (traces.length > 12) traces.splice(0, traces.length - 12);
+          }
+        });
+        kick();
+        greetTimer = setTimeout(function () { layer.textContent = ''; }, reduce ? 2100 : 2300);
+        /* the words are also announced, at most once every few seconds */
+        if (status && Date.now() - lastSaid > 4000) {
+          lastSaid = Date.now();
+          status.textContent = '';
+          setTimeout(function () { status.textContent = 'Hello! ¡Hola! Ciao! Welcome! ¡Bienvenidos! Benvenuti!'; }, 60);
+        }
+      }
+
       fig.addEventListener('pointerdown', function (e) {
         if (e.button !== 0) return;
         var r = canvas.getBoundingClientRect();
@@ -534,6 +647,8 @@
       var text = !hero && !title && !ext && !link && el.closest('p, li, dd, dt, h1, h2, figcaption');
       cur.classList.toggle('is-hero', !!hero);
       cur.classList.toggle('is-title', !!title);
+      /* over a project title the halo takes that project's colour */
+      if (title) cur.style.setProperty('--hover-accent', getComputedStyle(title).getPropertyValue('--section-accent').trim());
       cur.classList.toggle('is-external', !!ext);
       cur.classList.toggle('is-link', !!link);
       cur.classList.toggle('is-text', !!text);
@@ -565,9 +680,12 @@
   var steps = qsa('[data-step]');
   var rail = doc.querySelector('.rail'), sig = doc.querySelector('.sig');
   var railCells = [], sigCells = [];
-  steps.forEach(function () {
-    if (rail) railCells.push(rail.appendChild(doc.createElement('i')));
-    if (sig) sigCells.push(sig.appendChild(doc.createElement('i')));
+  /* a step's colour identity: its own section, or the project page's */
+  function sectionOf(el) { return el.getAttribute('data-section') || doc.body.getAttribute('data-section') || ''; }
+  steps.forEach(function (s) {
+    var cell;
+    if (rail) { cell = rail.appendChild(doc.createElement('i')); if (sectionOf(s)) cell.setAttribute('data-section', sectionOf(s)); railCells.push(cell); }
+    if (sig) { cell = sig.appendChild(doc.createElement('i')); if (sectionOf(s)) cell.setAttribute('data-section', sectionOf(s)); sigCells.push(cell); }
   });
 
   var navMap = { statement: '#statement', works: '#works', systems: '#systems', ludology: '#systems', publications: '#publications' };
@@ -589,9 +707,13 @@
       c.classList.toggle('is-seen', !!seen[k] && k !== n);
     });
     sigCells.forEach(function (c, k) {
-      c.className = seen[k] ? 'c' + (k % 3) : '';
-      if (k === n) c.classList.add('is-now');
+      c.classList.toggle('is-seen', !!seen[k]);
+      c.classList.toggle('is-now', k === n);
     });
+    /* the page-wide indicators take on this section's colour; CSS blends
+       the previous colour into it before settling */
+    var sec = sectionOf(el);
+    if (sec) root.setAttribute('data-active', sec);
     var href = navMap[sectionKey(el)];
     navLinks.forEach(function (a) {
       if (href && a.getAttribute('href') === href) a.setAttribute('aria-current', 'location');
@@ -602,17 +724,30 @@
 
   if ('IntersectionObserver' in window && steps.length) {
     var currentObs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) { if (en.isIntersecting) markCurrent(en.target); });
+      var atEnd = window.innerHeight + window.scrollY >= root.scrollHeight - 4;
+      entries.forEach(function (en) { if (en.isIntersecting && !(atEnd && en.target !== steps[steps.length - 1])) markCurrent(en.target); });
     }, { rootMargin: '-35% 0px -60% 0px' });
     steps.forEach(function (s) { currentObs.observe(s); });
+    /* the last section may be too short to reach the reading line: at the very
+       bottom of the page it becomes current, so the coda can close the visit */
+    var endRaf = 0;
+    window.addEventListener('scroll', function () {
+      if (endRaf) return;
+      endRaf = requestAnimationFrame(function () {
+        endRaf = 0;
+        if (window.innerHeight + window.scrollY >= root.scrollHeight - 4) markCurrent(steps[steps.length - 1]);
+      });
+    }, { passive: true });
   }
 
-  /* index: hovering or focusing a project title activates its block */
+  /* index: hovering or focusing a project title activates its block, and its
+     marker on the rail lights in the project's colour (an exhibition map) */
   qsa('.category-link').forEach(function (link) {
     var block = link.closest('.block');
     if (!block) return;
-    var on = function () { block.classList.add('is-active'); };
-    var off = function () { block.classList.remove('is-active'); };
+    var cell = railCells[steps.indexOf(block)];
+    var on = function () { block.classList.add('is-active'); if (cell) cell.classList.add('is-peek'); };
+    var off = function () { block.classList.remove('is-active'); if (cell) cell.classList.remove('is-peek'); };
     link.addEventListener('focus', on);
     link.addEventListener('blur', off);
     if (finePointer) {
@@ -752,6 +887,16 @@
     clearTimeout(stepTimer);
   }
 
+  /* the keycap beside the control answers the key press */
+  var keycapTimer = {};
+  function pressKeycap(k) {
+    qsa('.keycap[data-key="' + k + '"]').forEach(function (cap) {
+      cap.classList.add('is-pressed');
+      clearTimeout(keycapTimer[k]);
+      keycapTimer[k] = setTimeout(function () { cap.classList.remove('is-pressed'); }, 160);
+    });
+  }
+
   function isTyping(el) {
     if (!el) return false;
     var tag = el.tagName;
@@ -770,16 +915,20 @@
     var lbOpen = lb.dialog && lb.dialog.open;
     var k = e.key;
 
+    /* numeric shortcuts, from the number row or the keypad (NumLock on):
+       1 Day / Night, 2 EN → ES → IT. Ignored while held down. */
+    if ((k === '1' || k === '2') && !e.repeat) {
+      e.preventDefault();
+      if (k === '1') toggleTheme(); else cycleLang();
+      pressKeycap(k);
+      return;
+    }
+
     if (lbOpen) {
       if (k === 'ArrowRight') { e.preventDefault(); lb.go(1); }
       else if (k === 'ArrowLeft') { e.preventDefault(); lb.go(-1); }
-      else if (k === 't' || k === 'T') toggleTheme();
-      else if (k === 'l' || k === 'L') cycleLang();
       return; /* Escape is handled by the dialog's cancel event */
     }
-
-    if (k === 't' || k === 'T') { e.preventDefault(); toggleTheme(); return; }
-    if (k === 'l' || k === 'L') { e.preventDefault(); cycleLang(); return; }
 
     if ((k === 'Escape' || k === 'Backspace') && isProject) {
       var back = doc.querySelector('.back-link');

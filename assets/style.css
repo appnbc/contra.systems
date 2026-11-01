@@ -1,10 +1,23 @@
 /* =====================================================================
    TACTILE CURATION — site styles
-   Editorial archive, Day (paper) and Night (carbon), with three accents:
-   teal (primary), pink (secondary), yellow (tertiary).
-   Graphic accents use the given hues; text accents use contrast-safe
-   (WCAG AA) variants of the same hues.
+   Editorial archive, Day (paper) and Night (carbon).
+
+   Colour is layered in three systems that never compete:
+   - SECTION: each of the eleven sections owns one muted prism colour
+     (coral → rose). It marks numbers, fine rules, small labels and the
+     active-section indicators. Source of truth: the [data-section] and
+     [data-active] rules below.
+   - LANGUAGE: a secondary pair (--la / --lb), used in the language
+     selector, the cursor and the hero only.
+   - THEME: Day / Night sets the background atmosphere and how luminous
+     the accents are.
+   Graphic accents use the prism values; small text uses the *-text
+   variants, which meet WCAG AA on the page background.
    ===================================================================== */
+
+/* the active-section colour and its slower "memory" are animatable */
+@property --active-accent { syntax: '<color>'; inherits: true; initial-value: #B96F70; }
+@property --prev-accent { syntax: '<color>'; inherits: true; initial-value: #B96F70; }
 
 :root,
 [data-theme="day"] {
@@ -15,21 +28,24 @@
   --muted: #5F5E58;
   --soft: #8C8A82;
 
-  --teal: #478F85;   --teal-text: #2F7268;
-  --pink: #C47C96;   --pink-text: #9E4F6D;
-  --yellow: #B99543; --yellow-text: #7E6220;
-  --teal-wash: rgba(71, 143, 133, 0.12);
-  --pink-wash: rgba(196, 124, 150, 0.12);
-
   --overlay: rgba(247, 246, 242, 0.97);
   --shadow: 0 18px 40px -26px rgba(20, 20, 19, 0.35);
   --grain-opacity: 0.045;
+  --wash-strength: 7%;
 
-  /* spectrum (graphic use; deepened for paper so marks stay visible) */
-  --s-teal: #3F8F82; --s-cyan: #3E8FA6; --s-blue: #5A72C2; --s-violet: #7D63B3;
-  --s-magenta: #A55C96; --s-pink: #B9637F; --s-coral: #BC6A4E; --s-amber: #A9863A;
-  /* contrast-safe text versions */
-  --t-teal: #2F7268; --t-cyan: #2B6C80; --t-coral: #9A4E36; --t-violet: #6A4FA0;
+  /* prism: muted jewel tones, as if refracted through glass */
+  --prism-coral: #B96F70;      --prism-coral-text: #9A5C5D;
+  --prism-orange: #B77A52;     --prism-orange-text: #946342;
+  --prism-amber: #9C813B;      --prism-amber-text: #826B31;
+  --prism-chartreuse: #718B57; --prism-chartreuse-text: #5E7448;
+  --prism-teal: #4F8D7F;       --prism-teal-text: #44796D;
+  --prism-cyan: #4B8FA0;       --prism-cyan-text: #3E7785;
+  --prism-blue: #607FB1;       --prism-blue-text: #55709D;
+  --prism-indigo: #7776A8;     --prism-indigo-text: #696895;
+  --prism-violet: #9676AE;     --prism-violet-text: #7D6291;
+  --prism-magenta: #AB6F9B;    --prism-magenta-text: #935F85;
+  --prism-rose: #B66E87;       --prism-rose-text: #985C70;
+  --prism-yellow: #A88F35;     --prism-yellow-text: #806D28;
   --atmos-day: 1; --atmos-night: 0;
   color-scheme: light;
 }
@@ -41,29 +57,69 @@
   --muted: #A3A29C;
   --soft: #6E6D68;
 
-  --teal: #79BDB1;   --teal-text: #79BDB1;
-  --pink: #D79AAF;   --pink-text: #D79AAF;
-  --yellow: #D6B96D; --yellow-text: #D6B96D;
-  --teal-wash: rgba(121, 189, 177, 0.13);
-  --pink-wash: rgba(215, 154, 175, 0.12);
-
   --overlay: rgba(17, 17, 16, 0.97);
   --shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.8);
   --grain-opacity: 0.06;
+  --wash-strength: 8%;
 
-  --s-teal: #61B8AA; --s-cyan: #78BFD0; --s-blue: #8298D8; --s-violet: #A18BC8;
-  --s-magenta: #C68BB9; --s-pink: #D58CAC; --s-coral: #DA927C; --s-amber: #D6B96D;
-  --t-teal: #61B8AA; --t-cyan: #78BFD0; --t-coral: #DA927C; --t-violet: #A18BC8;
+  --prism-coral: #E59A9C;      --prism-coral-text: #E59A9C;
+  --prism-orange: #E2A77E;     --prism-orange-text: #E2A77E;
+  --prism-amber: #D9BD73;      --prism-amber-text: #D9BD73;
+  --prism-chartreuse: #A8BB84; --prism-chartreuse-text: #A8BB84;
+  --prism-teal: #80BBAA;       --prism-teal-text: #80BBAA;
+  --prism-cyan: #84BECE;       --prism-cyan-text: #84BECE;
+  --prism-blue: #91ABD9;       --prism-blue-text: #91ABD9;
+  --prism-indigo: #A4A3D2;     --prism-indigo-text: #A4A3D2;
+  --prism-violet: #C0A0D5;     --prism-violet-text: #C0A0D5;
+  --prism-magenta: #D09AC0;    --prism-magenta-text: #D09AC0;
+  --prism-rose: #E0A0B7;       --prism-rose-text: #E0A0B7;
+  --prism-yellow: #E3CC7C;     --prism-yellow-text: #E3CC7C;
   --atmos-day: 0; --atmos-night: 1;
   color-scheme: dark;
 }
 
-/* Each language leans on its own pair from the spectrum, in a few small places only */
-:root, [data-lang="en"] { --la: var(--s-teal);   --lb: var(--s-cyan);  --la-text: var(--t-teal); }
-[data-lang="es"]        { --la: var(--s-coral);  --lb: var(--s-pink);  --la-text: var(--t-coral); }
-[data-lang="it"]        { --la: var(--s-violet); --lb: var(--s-amber); --la-text: var(--t-violet); }
+/* ---------- Section identities (single source of truth) ----------
+   [data-section] colours a section's own content area and its project page;
+   [data-active] on <html> is the section currently in view, and drives the
+   rail, the navigation marker and other page-wide indicators. */
+[data-section="01"] { --section-accent: var(--prism-coral);      --section-accent-text: var(--prism-coral-text); }
+[data-section="02"] { --section-accent: var(--prism-orange);     --section-accent-text: var(--prism-orange-text); }
+[data-section="03"] { --section-accent: var(--prism-amber);      --section-accent-text: var(--prism-amber-text); }
+[data-section="04"] { --section-accent: var(--prism-chartreuse); --section-accent-text: var(--prism-chartreuse-text); }
+[data-section="05"] { --section-accent: var(--prism-teal);       --section-accent-text: var(--prism-teal-text); }
+[data-section="06"] { --section-accent: var(--prism-cyan);       --section-accent-text: var(--prism-cyan-text); }
+[data-section="07"] { --section-accent: var(--prism-blue);       --section-accent-text: var(--prism-blue-text); }
+[data-section="08"] { --section-accent: var(--prism-indigo);     --section-accent-text: var(--prism-indigo-text); }
+[data-section="09"] { --section-accent: var(--prism-violet);     --section-accent-text: var(--prism-violet-text); }
+[data-section="10"] { --section-accent: var(--prism-magenta);    --section-accent-text: var(--prism-magenta-text); }
+[data-section="11"] { --section-accent: var(--prism-rose);       --section-accent-text: var(--prism-rose-text); }
+
+:root { --active-accent: var(--prism-coral); --prev-accent: var(--prism-coral); --active-accent-text: var(--prism-coral-text); }
+[data-active="01"] { --active-accent: var(--prism-coral);      --prev-accent: var(--prism-coral);      --active-accent-text: var(--prism-coral-text); }
+[data-active="02"] { --active-accent: var(--prism-orange);     --prev-accent: var(--prism-orange);     --active-accent-text: var(--prism-orange-text); }
+[data-active="03"] { --active-accent: var(--prism-amber);      --prev-accent: var(--prism-amber);      --active-accent-text: var(--prism-amber-text); }
+[data-active="04"] { --active-accent: var(--prism-chartreuse); --prev-accent: var(--prism-chartreuse); --active-accent-text: var(--prism-chartreuse-text); }
+[data-active="05"] { --active-accent: var(--prism-teal);       --prev-accent: var(--prism-teal);       --active-accent-text: var(--prism-teal-text); }
+[data-active="06"] { --active-accent: var(--prism-cyan);       --prev-accent: var(--prism-cyan);       --active-accent-text: var(--prism-cyan-text); }
+[data-active="07"] { --active-accent: var(--prism-blue);       --prev-accent: var(--prism-blue);       --active-accent-text: var(--prism-blue-text); }
+[data-active="08"] { --active-accent: var(--prism-indigo);     --prev-accent: var(--prism-indigo);     --active-accent-text: var(--prism-indigo-text); }
+[data-active="09"] { --active-accent: var(--prism-violet);     --prev-accent: var(--prism-violet);     --active-accent-text: var(--prism-violet-text); }
+[data-active="10"] { --active-accent: var(--prism-magenta);    --prev-accent: var(--prism-magenta);    --active-accent-text: var(--prism-magenta-text); }
+[data-active="11"] { --active-accent: var(--prism-rose);       --prev-accent: var(--prism-rose);       --active-accent-text: var(--prism-rose-text); }
+/* the new colour settles quickly; the previous one lingers a moment longer
+   (colour memory) wherever the two are drawn together */
+html { transition: --active-accent 450ms ease, --prev-accent 1500ms ease; }
+/* outside any section (top bar, footer) the section colour follows the active one */
+:root { --section-accent: var(--active-accent); --section-accent-text: var(--active-accent-text); }
+
+/* Each language leans on its own pair from the spectrum, in the language
+   selector, the cursor and the hero only */
+:root, [data-lang="en"] { --la: var(--prism-teal);   --lb: var(--prism-cyan);  --la-text: var(--prism-teal-text); }
+[data-lang="es"]        { --la: var(--prism-coral);  --lb: var(--prism-rose);  --la-text: var(--prism-coral-text); }
+[data-lang="it"]        { --la: var(--prism-violet); --lb: var(--prism-amber); --la-text: var(--prism-violet-text); }
 
 :root {
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'URW Palladio L', P052, 'Book Antiqua', Georgia, serif;
   --sans: 'Helvetica Neue', Helvetica, Inter, Arial, sans-serif;
   --mono: ui-monospace, 'SFMono-Regular', 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
   --measure: 1080px;
@@ -96,7 +152,7 @@ body::before {
   opacity: var(--grain-opacity);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-::selection { background: var(--teal); color: var(--bg); }
+::selection { background: var(--section-accent); color: var(--bg); }
 
 /* Atmosphere: Day is light falling across paper; Night is a dim exhibition
    space where colour rises out of the dark. Two fixed layers cross-fade. */
@@ -178,13 +234,16 @@ main { outline: none; }
   height: 3px;
   pointer-events: none;
 }
+/* each marker carries its section's colour, like an exhibition map */
 .rail i {
   flex: 1 1 0;
-  background: var(--border-color);
-  transition: background-color var(--mid) ease, flex-grow 400ms var(--ease);
+  background: color-mix(in srgb, var(--section-accent) 22%, var(--border-color));
+  transition: background-color var(--mid) ease, flex-grow 400ms var(--ease), opacity var(--mid) ease;
 }
-.rail i.is-seen { background: var(--soft); }
-.rail i.is-now { background: linear-gradient(90deg, var(--la), var(--lb)); flex-grow: 2.4; }
+.rail i.is-seen { background: color-mix(in srgb, var(--section-accent) 60%, var(--border-color)); }
+.rail i.is-peek { background: var(--section-accent); }
+/* the current marker blends the previous section's colour into the new one, then settles */
+.rail i.is-now { background: linear-gradient(90deg, var(--prev-accent), var(--active-accent) 65%); flex-grow: 2.4; }
 
 /* ---------- Links: one underline language for the whole site ---------- */
 .u {
@@ -195,7 +254,7 @@ main { outline: none; }
   padding-bottom: 2px;
   transition: background-size var(--mid) var(--ease), color var(--fast) ease;
 }
-.u:hover, .u:focus-visible { background-size: 100% 1px, 100% 1px; color: var(--teal-text); }
+.u:hover, .u:focus-visible { background-size: 100% 1px, 100% 1px; color: var(--section-accent-text); }
 .arrow-r, .arrow-l, .arrow-ne { display: inline-block; transition: transform var(--mid) var(--ease); }
 a:hover .arrow-r, a:focus-visible .arrow-r { transform: translateX(4px); }
 a:hover .arrow-l, a:focus-visible .arrow-l { transform: translateX(-4px); }
@@ -212,13 +271,13 @@ a:hover .arrow-ne, a:focus-visible .arrow-ne { transform: translate(3px, -3px); 
   border-bottom: 1px solid var(--border-color);
   position: relative;
 }
-/* fine accent rule under the bar: a teal segment under the name */
+/* fine accent rule under the bar, in the colour of the section in view */
 .topbar-row::after {
   content: '';
   position: absolute;
   left: 0; bottom: -1px;
   width: 64px; height: 1px;
-  background: var(--teal);
+  background: linear-gradient(90deg, var(--prev-accent), var(--active-accent));
 }
 .brand {
   display: inline-flex;
@@ -246,28 +305,50 @@ a:hover .arrow-ne, a:focus-visible .arrow-ne { transform: translate(3px, -3px); 
   padding: 0.15rem 0 0.15rem 0.9rem;
   transition: color var(--fast) ease;
 }
-/* section marker: a small square that lights teal on the current section */
+/* section marker: a small square outlined in its section's colour, which
+   fills (with the active section's colour) on the section in view */
 .quick-nav a::before {
   content: '';
   position: absolute;
   left: 0; top: 50%;
   width: 5px; height: 5px;
   margin-top: -2.5px;
-  border: 1px solid var(--soft);
+  border: 1px solid var(--section-accent);
   transition: background-color var(--mid) ease, border-color var(--mid) ease, transform var(--mid) var(--ease);
 }
 .quick-nav a:hover { color: var(--ink); }
-.quick-nav a:hover::before { border-color: var(--pink); }
+.quick-nav a:hover::before { background: color-mix(in srgb, var(--section-accent) 35%, transparent); }
 .quick-nav a[aria-current] { color: var(--ink); }
-.quick-nav a[aria-current]::before { background: linear-gradient(135deg, var(--la), var(--lb)); border-color: var(--la); transform: rotate(45deg); }
+.quick-nav a[aria-current]::before { background: var(--active-accent); border-color: var(--active-accent); transform: rotate(45deg); }
 
 /* ---------- Segmented controls (language, theme) ---------- */
 .utils {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.9rem;
   margin-left: auto;
 }
+/* a control and its keyboard shortcut, as one component */
+.ctl { display: inline-flex; align-items: center; gap: 0.4rem; }
+.keycap {
+  display: inline-grid;
+  place-items: center;
+  min-width: 17px; height: 17px;
+  padding: 0 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  line-height: 1;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--mat) 70%, var(--bg));
+  border: 1px solid var(--border-color);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  user-select: none;
+  transition: color var(--fast) ease, border-color var(--fast) ease, transform 120ms ease;
+}
+.keycap.is-pressed { color: var(--ink); border-color: var(--soft); transform: translateY(1px); border-bottom-width: 1px; }
+/* only where a keyboard is likely: hidden on touch-only devices */
+@media not (any-pointer: fine) { .keycap { display: none; } }
 .seg {
   --n: 3; --i: 0;
   position: relative;
@@ -287,10 +368,17 @@ a:hover .arrow-ne, a:focus-visible .arrow-ne { transform: translate(3px, -3px); 
   top: 0; bottom: 0; left: 0;
   width: calc(100% / var(--n));
   transform: translateX(calc(var(--i) * 100%));
-  background: var(--teal-wash);
-  border-bottom: 1px solid var(--teal);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  border-bottom: 1px solid var(--soft);
   z-index: -1;
   transition: transform 300ms var(--ease);
+}
+/* the theme indicator rests on a fine refracted line */
+.seg--theme::before {
+  border-bottom: 0;
+  background:
+    linear-gradient(90deg, var(--prism-amber), var(--prism-coral), var(--prism-rose), var(--prism-violet), var(--prism-blue), var(--prism-cyan)) left bottom / 100% 1px no-repeat,
+    color-mix(in srgb, var(--ink) 6%, transparent);
 }
 .seg > a, .seg > button {
   display: inline-flex;
@@ -303,11 +391,29 @@ a:hover .arrow-ne, a:focus-visible .arrow-ne { transform: translate(3px, -3px); 
   transition: color var(--fast) ease, background-color var(--fast) ease;
 }
 .seg > * + * { border-left: 1px solid var(--border-color); }
-.seg > a:hover, .seg > button:hover { color: var(--ink); background: var(--pink-wash); }
-.seg > [aria-current], .seg > [aria-pressed="true"] { color: var(--teal-text); }
+.seg > a:hover, .seg > button:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.seg > [aria-current], .seg > [aria-pressed="true"] { color: var(--ink); }
 .seg > [aria-current]:hover, .seg > [aria-pressed="true"]:hover { background: none; }
-.seg svg { width: 12px; height: 12px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; }
-.seg svg.moon { fill: currentColor; stroke: none; }
+
+/* prismatic sun and moon: inline SVG, gradient stops follow the theme */
+.seg .ico { width: 15px; height: 15px; flex: none; overflow: visible; opacity: 0.62; transition: opacity var(--mid) ease, transform 400ms var(--ease); }
+.seg [aria-pressed="true"] .ico { opacity: 1; }
+.seg button:hover .ico { opacity: 0.9; }
+.seg button[data-set-theme="day"]:hover .ico { transform: rotate(22.5deg); }
+.seg button[data-set-theme="night"]:hover .ico { transform: rotate(-10deg); }
+.ico .st-cyan { stop-color: var(--prism-cyan); }
+.ico .st-blue { stop-color: var(--prism-blue); }
+.ico .st-violet { stop-color: var(--prism-violet); }
+.ico .st-rose { stop-color: var(--prism-rose); }
+.ico .st-amber { stop-color: var(--prism-amber); }
+.ico .st-yellow { stop-color: var(--prism-yellow); }
+.ico .st-coral { stop-color: var(--prism-coral); }
+.ico .glass { fill: none; stroke: var(--bg); stroke-width: 0.6; opacity: 0.55; }
+.ico .rim { fill: none; stroke-width: 0.7; opacity: 0.85; }
+.ico .glint { fill: var(--ink); opacity: 0.75; }
+[data-theme="night"] .ico .glint { fill: #FFFFFF; opacity: 0.9; }
+[data-theme="night"] .ico .glass { stroke: #FFFFFF; opacity: 0.35; }
+.ico .rays { fill: none; stroke-width: 0.9; stroke-linecap: round; }
 html[lang="es"] .seg--lang { --i: 1; }
 html[lang="it"] .seg--lang { --i: 2; }
 /* the language selector carries the language's own accent */
@@ -335,6 +441,25 @@ html[lang="it"] .seg--lang { --i: 2; }
   margin: 0;
   text-wrap: balance;
 }
+/* who: a short descriptor in the literary voice, then one supporting line */
+.descriptor {
+  margin: 1.6rem 0 0;
+  max-width: 34ch;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.1rem, 1.7vw, 1.28rem);
+  line-height: 1.42;
+  font-weight: 400;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.descriptor-support {
+  margin: 0.85rem 0 0;
+  max-width: 46ch;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
 .weave {
   position: relative;
   margin: 0;
@@ -360,14 +485,69 @@ html[lang="it"] .seg--lang { --i: 2; }
   content: '';
   position: absolute;
   width: 9px; height: 9px;
-  border: solid var(--teal);
-  z-index: 1;
+  border: solid var(--la);
+  z-index: 3;
   pointer-events: none;
 }
+.weave::after { border-color: var(--lb); }
 .weave::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
 .weave::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
 .weave[role="button"] { cursor: crosshair; }
 .weave:focus-visible { outline: 2px solid var(--ink); outline-offset: 6px; }
+
+/* ---------- Hero greetings: six words that emerge from the grid ----------
+   Each phrase has its own colour and typographic voice; punctuation is set
+   apart in a brighter spectral hue. Positioned by script at grid crossings,
+   always inside the artwork, and removed once the animation ends. */
+.greet { position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; --gs: 20px; }
+.gw {
+  position: absolute;
+  left: 0; top: 0;
+  white-space: nowrap;
+  font-size: var(--gs);
+  line-height: 1;
+  color: var(--g-c);
+  /* a soft halo of the artwork's own ground keeps each word legible over the threads */
+  text-shadow: 0 0 3px var(--mat), 0 0 8px var(--mat), 0 0 14px var(--mat);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: greet 1500ms var(--ease) var(--d, 0ms) both;
+}
+.gw .gp { color: var(--g-p); display: inline-block; animation: punct 1500ms ease var(--d, 0ms) both; }
+/* six voices: serif, sans and mono, varied in weight, slope and spacing */
+.gw--hello { --g-c: var(--prism-coral-text);  --g-p: var(--prism-cyan);   font-family: var(--serif); font-style: italic; font-size: calc(var(--gs) * 1.3); letter-spacing: -0.005em; }
+.gw--hola { --g-c: var(--prism-rose-text);    --g-p: var(--prism-amber);  font-family: var(--sans); font-weight: 600; letter-spacing: -0.025em; font-size: calc(var(--gs) * 1.08); }
+.gw--ciao { --g-c: var(--prism-amber-text);   --g-p: var(--prism-violet); font-family: var(--mono); font-weight: 400; letter-spacing: 0.08em; font-size: calc(var(--gs) * 0.86); }
+.gw--welcome { --g-c: var(--prism-teal-text); --g-p: var(--prism-rose);   font-family: var(--serif); font-weight: 400; letter-spacing: 0.01em; font-size: calc(var(--gs) * 1.12); }
+.gw--bienvenidos { --g-c: var(--prism-blue-text); --g-p: var(--prism-yellow); font-family: var(--sans); font-weight: 300; letter-spacing: 0.05em; font-size: calc(var(--gs) * 0.94); }
+.gw--benvenuti { --g-c: var(--prism-violet-text); --g-p: var(--prism-coral); font-family: var(--serif); font-style: italic; font-weight: 300; letter-spacing: 0.04em; font-size: calc(var(--gs) * 1.18); }
+@keyframes greet {
+  0% { opacity: 0; transform: translate(var(--x), calc(var(--y) + 7px)) scale(0.97); filter: blur(2px); }
+  18% { opacity: 1; transform: translate(var(--x), var(--y)) scale(1); filter: blur(0); }
+  72% { opacity: 1; transform: translate(calc(var(--x) + var(--dx)), calc(var(--y) + var(--dy))); filter: blur(0); }
+  100% { opacity: 0; transform: translate(calc(var(--x) + var(--dx) * 1.6), calc(var(--y) + var(--dy) * 1.6)); filter: blur(1px); }
+}
+/* punctuation briefly burns brighter than its word */
+@keyframes punct {
+  0%, 12% { filter: none; }
+  26% { filter: brightness(1.3) saturate(1.25); text-shadow: 0 0 3px var(--mat), 0 0 9px var(--g-p); }
+  55%, 100% { filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* a simple, brief opacity transition: no floating */
+  .gw, .gw .gp { animation-duration: 1900ms !important; }
+  .gw { animation-name: greet-still !important; animation-timing-function: ease !important; animation-delay: 0ms !important; }
+  .gw .gp { animation-name: none !important; }
+}
+@keyframes greet-still {
+  0% { opacity: 0; transform: translate(var(--x), var(--y)); }
+  14%, 80% { opacity: 1; transform: translate(var(--x), var(--y)); }
+  100% { opacity: 0; transform: translate(var(--x), var(--y)); }
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
 
 /* discreet invitation under the graphic */
 .weave-hint {
@@ -409,20 +589,36 @@ html[lang="it"] .seg--lang { --i: 2; }
   margin-bottom: clamp(4rem, 8vw, 6rem);
   border-top: 1px solid var(--border-color);
   scroll-margin-top: 1.5rem;
+  isolation: isolate;
 }
-/* accent line that draws across the top of the active section */
+/* the section's own colour: a short resting segment over its number, which
+   draws across the whole section when it is in view */
 .block::before {
   content: '';
   position: absolute;
   top: -1px; left: 0;
   height: 1px; width: 100%;
-  background: var(--teal);
-  transform: scaleX(0);
+  background: var(--section-accent);
+  transform: scaleX(0.06);
   transform-origin: left;
   transition: transform 500ms var(--ease);
 }
 .block.is-current::before,
 .block.is-active::before { transform: scaleX(1); }
+/* a barely perceptible wash of the section's colour where it begins */
+.block::after, .subpage-header::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -5rem;
+  left: calc(-1 * var(--gutter));
+  right: calc(-1 * var(--gutter));
+  height: 30rem;
+  pointer-events: none;
+  /* closest-side: the glow fades to nothing before any edge of its box */
+  background: radial-gradient(closest-side at 24% 36%, color-mix(in srgb, var(--section-accent) var(--wash-strength), transparent), transparent);
+}
+.subpage-header { position: relative; isolation: isolate; }
 
 .block-meta {
   position: sticky;
@@ -439,25 +635,27 @@ html[lang="it"] .seg--lang { --i: 2; }
   line-height: 1;
   letter-spacing: -0.03em;
   color: transparent;
-  -webkit-text-stroke: 1px var(--soft);
+  -webkit-text-stroke: 1px var(--section-accent);
   margin-bottom: 1rem;
   transition: color 400ms ease, -webkit-text-stroke-color 400ms ease;
 }
-/* small pink marker that appears beside the active number */
+/* small marker beside the number: an outline at rest, filled when active */
 .index::after {
   content: '';
   position: absolute;
   top: 0.12em; right: -14px;
   width: 6px; height: 6px;
-  background: var(--lb);
-  transform: scale(0);
+  border: 1px solid var(--section-accent);
+  transform: scale(0.7);
   transition: transform var(--mid) var(--ease), background-color var(--mid) ease;
 }
 .block.is-current .index,
-.block.is-active .index { color: var(--teal-text); -webkit-text-stroke-color: var(--teal-text); }
+.block.is-active .index { color: var(--section-accent); -webkit-text-stroke-color: var(--section-accent); }
 .block.is-current .index::after,
-.block.is-active .index::after { transform: scale(1); }
-@supports not (-webkit-text-stroke: 1px black) { .index { color: var(--muted); } }
+.block.is-active .index::after { transform: scale(1) rotate(45deg); background: var(--section-accent); }
+@supports not (-webkit-text-stroke: 1px black) { .index { color: var(--section-accent-text); } }
+/* sub-numbers on project pages (02.1, 02.2) are smaller and use the text tone */
+.is-project .index { font-size: 1.6rem; }
 
 .label {
   margin: 0;
@@ -468,8 +666,8 @@ html[lang="it"] .seg--lang { --i: 2; }
 }
 .category-link { transition: color var(--fast) ease; }
 .category-link .arrow-ne { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); transition: transform var(--mid) var(--ease), color var(--fast) ease; }
-.category-link:hover, .category-link:focus-visible { color: var(--teal-text); }
-.category-link:hover .arrow-ne, .category-link:focus-visible .arrow-ne { color: var(--pink-text); }
+.category-link:hover, .category-link:focus-visible { color: var(--section-accent-text); }
+.category-link:hover .arrow-ne, .category-link:focus-visible .arrow-ne { color: var(--section-accent-text); }
 
 .block-content > p {
   font-size: 1.08rem;
@@ -477,6 +675,141 @@ html[lang="it"] .seg--lang { --i: 2; }
   max-width: 64ch;
 }
 .block-content > p:last-child { margin-bottom: 0; }
+
+/* ---------- Typographic voices ----------
+   serif: literary and expressive passages; sans: body and interface;
+   mono: metadata, indexes and numbers. Applied selectively. */
+.label em, .subpage-title em, .pub-text em, .gallery-heading em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+.subpage-title em { font-weight: 400; }
+/* the artist statement and the coda read as literary passages */
+.prose-serif > p {
+  font-family: var(--serif);
+  font-size: 1.14rem;
+  line-height: 1.62;
+  font-weight: 400;
+  text-wrap: pretty;
+}
+/* one concise descriptor where a project has one (The Agent): the voice of the work */
+.work-voice {
+  margin: 0 0 1.5rem;
+  max-width: 48ch;
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--section-accent);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.14rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+/* three practices that intersect (statement) */
+.practices {
+  list-style: none;
+  margin: 2.25rem 0 0;
+  padding: 0;
+  max-width: 64ch;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+.practices li { position: relative; padding-top: 0.8rem; border-top: 1px solid var(--border-color); }
+.practices li::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0;
+  width: 18px; height: 1px;
+  background: var(--section-accent);
+  transition: width 400ms var(--ease);
+}
+.practices li:hover::before { width: 100%; }
+.practices h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  hyphens: auto; -webkit-hyphens: auto;
+}
+.practices p { margin: 0; font-size: 0.86rem; line-height: 1.55; }
+
+/* linguistic marginalia (section 08): a small typographic study */
+.marginalia {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0.7rem 0;
+  max-width: 64ch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.6rem;
+  border-top: 1px dotted var(--border-color);
+  border-bottom: 1px dotted var(--border-color);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--soft);
+}
+.marginalia li { cursor: default; transition: color var(--fast) ease; }
+.marginalia .sl { margin: 0 0.3em; color: var(--border-color); }
+/* the term in the language being read is set in ink */
+[data-lang="en"] .marginalia [lang="en"],
+[data-lang="es"] .marginalia [lang="es"],
+[data-lang="it"] .marginalia [lang="it"] { color: var(--muted); }
+.marginalia li:hover { color: var(--muted); }
+[data-lang="en"] .marginalia li:hover [lang="en"],
+[data-lang="es"] .marginalia li:hover [lang="es"],
+[data-lang="it"] .marginalia li:hover [lang="it"] { color: var(--section-accent-text); }
+.marginalia li:hover .sl { color: var(--section-accent); }
+
+/* coda: a closing signal that answers the opening greeting */
+.coda-signal {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2.25rem;
+  max-width: 64ch;
+}
+.coda-signal .line {
+  position: relative;
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--border-color);
+  overflow: hidden;
+}
+.coda-signal .line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--prism-coral), var(--prism-orange), var(--prism-amber), var(--prism-chartreuse), var(--prism-teal), var(--prism-cyan), var(--prism-blue), var(--prism-indigo), var(--prism-violet), var(--prism-magenta), var(--prism-rose));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1600ms var(--ease);
+}
+.block.is-current .coda-signal .line::after { transform: scaleX(1); }
+.coda-signal .mark-end {
+  width: 6px; height: 6px;
+  background: var(--section-accent);
+  transform: rotate(45deg);
+}
+.coda-thanks {
+  margin: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.coda-thanks > span + span { margin-left: 0.55em; }
+.coda-thanks .gp { font-style: normal; }
+.coda-thanks .p1 { color: var(--prism-cyan); }
+.coda-thanks .p2 { color: var(--prism-amber); }
+.coda-thanks .p3 { color: var(--prism-violet); }
 
 .headshot {
   width: 100%;
@@ -502,7 +835,7 @@ html[lang="it"] .seg--lang { --i: 2; }
 .peek .mat {
   height: 168px;
   padding: 0.6rem;
-  border-left: 2px solid var(--teal);
+  border-left: 2px solid var(--section-accent);
 }
 .peek img { max-height: 100%; width: auto; height: auto; max-width: 100%; object-fit: contain; }
 .peek-label {
@@ -546,13 +879,13 @@ html[lang="it"] .seg--lang { --i: 2; }
   padding-top: 0.08rem;
   transition: color var(--mid) ease;
 }
-/* yellow tick: metadata highlight in the active section */
+/* fine tick in the section colour: metadata highlight in the active section */
 .spec dt::before {
   content: '';
   position: absolute;
   left: -12px; top: 0.62em;
   width: 5px; height: 1px;
-  background: var(--yellow);
+  background: var(--section-accent);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform var(--mid) var(--ease);
@@ -560,7 +893,7 @@ html[lang="it"] .seg--lang { --i: 2; }
 .block.is-current .spec dt::before,
 .block.is-active .spec dt::before { transform: scaleX(1); }
 .spec-row:hover { border-bottom-color: var(--soft); }
-.spec-row:hover dt { color: var(--yellow-text); }
+.spec-row:hover dt { color: var(--section-accent-text); }
 .spec dd { margin: 0; font-size: 0.9rem; line-height: 1.5; font-weight: 400; }
 
 /* ---------- Calls to action ---------- */
@@ -587,13 +920,13 @@ html[lang="it"] .seg--lang { --i: 2; }
   display: inline-grid;
   place-items: center;
   width: 26px; height: 26px;
-  border: 1px solid var(--teal);
-  color: var(--teal-text);
+  border: 1px solid var(--section-accent);
+  color: var(--section-accent-text);
   transition: background-color var(--fast) ease, color var(--fast) ease;
 }
 .watch-icon svg { width: 9px; height: 10px; fill: currentColor; margin-left: 2px; }
-.watch:hover { border-color: var(--teal); background: var(--teal-wash); }
-.watch:hover .watch-icon { background: var(--teal); color: var(--bg); }
+.watch:hover { border-color: var(--section-accent); background: color-mix(in srgb, var(--section-accent) 10%, transparent); }
+.watch:hover .watch-icon { background: var(--section-accent); color: var(--bg); }
 .watch:active { transform: translateY(1px); }
 
 /* ---------- Publications ---------- */
@@ -607,7 +940,7 @@ html[lang="it"] .seg--lang { --i: 2; }
   transition: border-color var(--mid) ease;
 }
 .pubs li:hover { border-bottom-color: var(--soft); }
-.pubs li:hover .pub-kind { color: var(--yellow-text); }
+.pubs li:hover .pub-kind { color: var(--section-accent-text); }
 .pub-kind {
   font-family: var(--mono);
   font-size: 0.72rem;
@@ -631,7 +964,7 @@ html[lang="it"] .seg--lang { --i: 2; }
   text-transform: uppercase;
   color: var(--muted);
 }
-.subpage-meta .num { color: var(--teal-text); }
+.subpage-meta .num { color: var(--section-accent-text); }
 .subpage-title {
   margin: 0;
   font-size: clamp(1.8rem, 4vw, 2.7rem);
@@ -669,7 +1002,7 @@ html[lang="it"] .seg--lang { --i: 2; }
   transition: border-color var(--mid) ease, inset var(--mid) var(--ease);
 }
 .fig-open:hover .mat, .fig-open:focus-visible .mat { border-color: var(--soft); }
-.fig-open:hover .mat::after, .fig-open:focus-visible .mat::after { border-color: var(--teal); inset: 4px; }
+.fig-open:hover .mat::after, .fig-open:focus-visible .mat::after { border-color: var(--section-accent); inset: 4px; }
 .mat img, .mat video {
   width: auto;
   height: auto;
@@ -684,8 +1017,8 @@ html[lang="it"] .seg--lang { --i: 2; }
   color: var(--muted);
 }
 .fig-no { color: var(--ink); transition: color var(--fast) ease; }
-.fig:hover .fig-no, .fig:focus-within .fig-no { color: var(--teal-text); }
-.fig--video .fig-no::after { content: ' ▸'; color: var(--pink-text); }
+.fig:hover .fig-no, .fig:focus-within .fig-no { color: var(--section-accent-text); }
+.fig--video .fig-no::after { content: ' ▸'; color: var(--section-accent-text); }
 
 /* Fig 1: hero on a neutral mat */
 .hero { margin-bottom: clamp(3.5rem, 8vw, 5.5rem); scroll-margin-top: 1.5rem; }
@@ -706,7 +1039,7 @@ html[lang="it"] .seg--lang { --i: 2; }
   text-transform: uppercase;
   color: var(--muted);
 }
-.gallery-heading::before { content: ''; width: 6px; height: 6px; background: var(--yellow); }
+.gallery-heading::before { content: ''; width: 6px; height: 6px; background: var(--section-accent); transform: rotate(45deg); }
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -740,15 +1073,15 @@ html[lang="it"] .seg--lang { --i: 2; }
   border: 1px solid var(--border-color);
   transition: border-color var(--fast) ease, background-color var(--fast) ease, color var(--fast) ease;
 }
-.copy-email:hover { border-color: var(--teal); background: var(--teal-wash); color: var(--teal-text); }
-.copy-email:active { background: var(--teal); color: var(--bg); }
+.copy-email:hover { border-color: var(--active-accent); background: color-mix(in srgb, var(--active-accent) 10%, transparent); color: var(--active-accent-text); }
+.copy-email:active { background: var(--active-accent); color: var(--bg); }
 .copy-badge {
   font-size: 0.68rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 0.12rem 0.45rem;
-  border: 1px solid var(--yellow);
-  color: var(--yellow-text);
+  border: 1px solid var(--active-accent);
+  color: var(--active-accent-text);
   opacity: 0;
   transform: translateY(2px);
   transition: opacity var(--fast) ease, transform var(--fast) ease;
@@ -763,21 +1096,6 @@ html[lang="it"] .seg--lang { --i: 2; }
   gap: 1rem;
   margin-top: 1.25rem;
 }
-.kbd-legend {
-  display: none;
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--soft);
-  letter-spacing: 0.02em;
-}
-kbd { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); padding: 0 0.15rem; }
-kbd::before { content: '['; }
-kbd::after { content: ']'; }
-@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
-  .kbd-legend { display: block; }
-}
-
 /* signature: the sections this visitor has walked through, as lit intersections */
 .sig {
   display: inline-grid;
@@ -791,9 +1109,7 @@ kbd::after { content: ']'; }
   border: 1px solid var(--border-color);
   transition: background-color 400ms ease, border-color 400ms ease, transform 400ms var(--ease);
 }
-.sig i.c0 { background: var(--teal); border-color: var(--teal); }
-.sig i.c1 { background: var(--pink); border-color: var(--pink); }
-.sig i.c2 { background: var(--yellow); border-color: var(--yellow); }
+.sig i.is-seen { background: var(--section-accent); border-color: var(--section-accent); }
 .sig i.is-now { transform: rotate(45deg); }
 
 /* ---------- Lightbox ---------- */
@@ -826,7 +1142,7 @@ kbd::after { content: ']'; }
   color: var(--muted);
   border-bottom: 1px solid var(--border-color);
 }
-.lb-count b { color: var(--teal-text); font-weight: 400; }
+.lb-count b { color: var(--section-accent-text); font-weight: 400; }
 .lb-controls { display: flex; gap: 0.5rem; }
 .lb-controls button {
   font-family: var(--mono);
@@ -836,8 +1152,8 @@ kbd::after { content: ']'; }
   border: 1px solid var(--border-color);
   transition: border-color var(--fast) ease, background-color var(--fast) ease, color var(--fast) ease;
 }
-.lb-controls button:hover { border-color: var(--teal); background: var(--teal-wash); color: var(--teal-text); }
-.lb-controls button:active { background: var(--teal); color: var(--bg); }
+.lb-controls button:hover { border-color: var(--section-accent); background: color-mix(in srgb, var(--section-accent) 10%, transparent); color: var(--section-accent-text); }
+.lb-controls button:active { background: var(--section-accent); color: var(--bg); }
 .lb-stage {
   display: flex;
   align-items: center;
@@ -863,7 +1179,7 @@ kbd::after { content: ']'; }
   font-size: 0.78rem;
   color: var(--muted);
 }
-.lb-caption .fig-no { color: var(--teal-text); }
+.lb-caption .fig-no { color: var(--section-accent-text); }
 html.lb-lock { overflow: hidden; }
 
 /* ---------- Gentle reveal (only with script) ---------- */
@@ -903,17 +1219,17 @@ html.lb-lock { overflow: hidden; }
 }
 .cursor.is-link .cursor-ring { transform: scale(1.45); border-color: var(--la); }
 .cursor.is-link .cursor-dot { background: var(--lb); }
-.cursor.is-title .cursor-ring { transform: scale(1.6); border-color: var(--s-cyan); }
-.cursor.is-title .cursor-dot { background: var(--s-teal); }
-.cursor.is-external .cursor-ring { transform: scale(1.45); border-color: var(--s-violet); }
-.cursor.is-external .cursor-dot { background: var(--s-pink); }
+.cursor.is-title .cursor-ring { transform: scale(1.6); border-color: var(--hover-accent, var(--active-accent)); }
+.cursor.is-title .cursor-dot { background: var(--hover-accent, var(--active-accent)); }
+.cursor.is-external .cursor-ring { transform: scale(1.45); border-color: var(--prism-violet); }
+.cursor.is-external .cursor-dot { background: var(--prism-rose); }
 .cursor.is-text .cursor-ring { transform: scale(0.6); opacity: 0.4; }
 .cursor.is-text .cursor-dot { opacity: 0; }
 /* over the hero the halo becomes spectral */
 .cursor.is-hero .cursor-ring {
   transform: scale(1.75);
   border: 1px solid transparent;
-  background: conic-gradient(from 0deg, var(--s-teal), var(--s-cyan), var(--s-blue), var(--s-violet), var(--s-magenta), var(--s-pink), var(--s-coral), var(--s-amber), var(--s-teal)) border-box;
+  background: conic-gradient(from 0deg, var(--prism-coral), var(--prism-orange), var(--prism-amber), var(--prism-chartreuse), var(--prism-teal), var(--prism-cyan), var(--prism-blue), var(--prism-indigo), var(--prism-violet), var(--prism-magenta), var(--prism-rose), var(--prism-coral)) border-box;
   -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
@@ -936,7 +1252,7 @@ html.lb-lock { overflow: hidden; }
 }
 .pulse.is-hero {
   border: 1.5px solid transparent;
-  background: conic-gradient(var(--s-teal), var(--s-cyan), var(--s-blue), var(--s-violet), var(--s-magenta), var(--s-pink), var(--s-coral), var(--s-amber), var(--s-teal)) border-box;
+  background: conic-gradient(var(--prism-coral), var(--prism-orange), var(--prism-amber), var(--prism-chartreuse), var(--prism-teal), var(--prism-cyan), var(--prism-blue), var(--prism-indigo), var(--prism-violet), var(--prism-magenta), var(--prism-rose), var(--prism-coral)) border-box;
   -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
@@ -976,6 +1292,11 @@ html.lb-lock { overflow: hidden; }
   .fig--card .mat img, .fig--card .mat video { max-height: 360px; }
   .fig--hero .mat img, .fig--hero .mat video { max-height: 70vh; }
   .weave { aspect-ratio: 4 / 3; }
+  .descriptor { margin-top: 1.2rem; }
+  .practices { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .coda-signal { flex-wrap: wrap; }
+  .coda-signal .line { flex-basis: 100%; order: 2; }
+  .prose-serif > p { font-size: 1.08rem; }
   .sig { margin-left: 0; }
   .lb-controls button { padding: 0.45rem 0.6rem; }
 }
@@ -989,6 +1310,6 @@ html.lb-lock { overflow: hidden; }
 
 /* ---------- Print ---------- */
 @media print {
-  .topbar .utils, .kbd-legend, .copy-wrap, .skip-link, .rail, .sig, .weave-wrap, .cursor, .atmos { display: none !important; }
+  .topbar .utils, .copy-wrap, .skip-link, .rail, .sig, .weave-wrap, .cursor, .atmos { display: none !important; }
   .js .block, .js .hero, .js .gallery-block { opacity: 1; transform: none; }
 }
