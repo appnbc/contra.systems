@@ -22,6 +22,11 @@ export const ui = {
   day: L('Day', 'Día', 'Giorno'),
   night: L('Night', 'Noche', 'Notte'),
   sectionsNav: L('Sections', 'Secciones', 'Sezioni'),
+  weaveHint: L('Interact to explore', 'Interactúa para explorar', 'Interagisci per esplorare'),
+  weaveLabel: L(
+    'Interactive woven grid. Press Enter or Space to send a wave of light through it.',
+    'Retícula tejida interactiva. Pulsa Intro o Espacio para enviar una onda de luz a través de ella.',
+    'Griglia intrecciata interattiva. Premi Invio o Spazio per inviare un\'onda di luce attraverso di essa.'),
   nav: [
     { href: '#statement', label: L('01 Statement', '01 Declaración', '01 Dichiarazione') },
     { href: '#works', label: L('02–07 Works', '02–07 Obras', '02–07 Opere') },

@@ -132,7 +132,7 @@ function head(pg, { title, description }) {
   const alternates = LANGS.map((l) => `  <link rel="alternate" hreflang="${l}" href="${SITE_URL}${pagePath(l, pg.slug)}">`).join('\n');
   const altData = LANGS.map((l) => `data-alt-${l}="${pg.alt(l)}"`).join(' ');
   return `<!doctype html>
-<html lang="${pg.lang}" data-theme="day" ${altData}>
+<html lang="${pg.lang}" data-lang="${pg.lang}" data-theme="day" ${altData}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -168,6 +168,7 @@ ${alternates}
 </head>
 <body class="${pg.slug ? 'is-project' : 'is-home'}">
 <a class="skip-link" href="#main" ${pg.t(ui.skip)}>${pg.s(ui.skip)}</a>
+<div class="atmos" aria-hidden="true"><i class="atmos-day"></i><i class="atmos-night"></i></div>
 `;
 }
 
@@ -258,7 +259,10 @@ function buildHome(lang) {
 <main id="main" tabindex="-1">
   <section class="hero-intro">
     <h1 class="headline" ${pg.t(home.headline)}>${pg.s(home.headline)}</h1>
-    <figure class="weave" aria-hidden="true"><canvas></canvas></figure>
+    <div class="weave-wrap">
+      <figure class="weave" role="button" tabindex="0" ${pg.a([['aria-label', ui.weaveLabel]])}><canvas aria-hidden="true"></canvas></figure>
+      <p class="weave-hint" aria-hidden="true"><i></i><span ${pg.t(ui.weaveHint)}>${pg.s(ui.weaveHint)}</span></p>
+    </div>
   </section>
 `;
   const st = home.statement;

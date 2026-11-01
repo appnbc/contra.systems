@@ -56,6 +56,7 @@
   });
 
   var lang = LANGS.indexOf(root.lang) > -1 ? root.lang : 'en';
+  var langTimer;
 
   function setLang(l, persist) {
     if (LANGS.indexOf(l) < 0) l = 'en';
@@ -75,6 +76,12 @@
         });
       });
       root.lang = l;
+      root.setAttribute('data-lang', l);
+      if (!reduce) {
+        root.classList.remove('lang-swap'); void root.offsetWidth; root.classList.add('lang-swap');
+        clearTimeout(langTimer); langTimer = setTimeout(function () { root.classList.remove('lang-swap'); }, 360);
+      }
+      if (weave) weave.retheme();
       var link = langLinks.filter(function (a) { return a.getAttribute('data-set-lang') === l; })[0];
       if (link) { try { history.replaceState(null, '', link.href + location.hash); } catch (e) {} }
     }
@@ -143,6 +150,9 @@
       var ptr = { x: -1e4, y: -1e4, sx: -1e4, sy: -1e4, on: false, e: 0 };
       var pulses = [], lastPulse = 0;
       var lit = [], section = 0, running = false, visible = true, raf = 0, t0 = performance.now();
+      var SPEC = ['s-teal', 's-cyan', 's-blue', 's-violet', 's-magenta', 's-pink', 's-coral', 's-amber'];
+      var LANG_OFF = { en: 0, es: 6, it: 3 };
+      var waves = [], WLIFE = 1150, WSPEED = 0.56, wrap = fig.parentNode;
 
       function hex(c) {
         c = c.trim();
@@ -156,9 +166,11 @@
       }
       function readPalette() {
         var cs = getComputedStyle(root), p = {};
-        ['ink', 'mat', 'teal', 'pink', 'yellow', 'border-color'].forEach(function (k) { p[k] = hex(cs.getPropertyValue('--' + k)); });
+        ['ink', 'mat', 'teal', 'pink', 'yellow', 'border-color', 'la', 'lb'].concat(SPEC).forEach(function (k) { p[k] = hex(cs.getPropertyValue('--' + k)); });
         return p;
       }
+      /* the spectrum, rotated so each language starts from its own colour */
+      function spec(i) { return pal[SPEC[(((i + LANG_OFF[lang]) % 8) + 8) % 8]]; }
       function rgba(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a.toFixed(3) + ')'; }
       function mix(dst, src, k) { for (var key in src) for (var i = 0; i < 3; i++) dst[key][i] += (src[key][i] - dst[key][i]) * k; }
 
@@ -207,6 +219,14 @@
                 x += dx / d * f; y += dy / d * f;
               }
             }
+            /* a wave front lifts the threads as it passes */
+            for (var w = 0; w < waves.length; w++) {
+              var W0 = waves[w], age = t - W0.t0;
+              if (age < 0 || age > WLIFE) continue;
+              var wx = x - W0.x, wy = y - W0.y, wd = Math.sqrt(wx * wx + wy * wy) || 1;
+              var off = wd - age * WSPEED, lift = (reduce ? 0 : 7) * (1 - age / WLIFE) * Math.exp(-off * off / 648);
+              x += wx / wd * lift; y += wy / wd * lift;
+            }
             X[i * rows + j] = x; Y[i * rows + j] = y;
           }
         }
@@ -220,12 +240,17 @@
 
       function draw(t) {
         var p = pal, ink = p.ink, i, j, idx;
+        /* clear every device pixel first: the edge rows are only partly
+           covered by a fractional-size fill and would keep the last frame */
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.fillStyle = rgba(p.mat, 1);
-        ctx.fillRect(0, 0, W, H);
+        ctx.fillRect(0, 0, Math.ceil(W), Math.ceil(H));
 
         /* light moving across a reflective surface */
-        var lx = W * (0.32 + 0.22 * Math.sin(t * 0.00006)), ly = H * (0.42 + 0.2 * Math.cos(t * 0.00005));
+        var tl = reduce ? 0 : t;   /* with reduced motion the light holds still */
+        var lx = W * (0.32 + 0.22 * Math.sin(tl * 0.00006)), ly = H * (0.42 + 0.2 * Math.cos(tl * 0.00005));
         var g = ctx.createRadialGradient(lx, ly, 0, lx, ly, Math.max(W, H) * 0.65);
         var acc = p[ACCENTS[section % 3]];
         g.addColorStop(0, rgba(acc, 0.16)); g.addColorStop(1, rgba(acc, 0));
@@ -250,7 +275,7 @@
           ctx.beginPath();
           ctx.moveTo(X[j], Y[j]);
           for (i = 1; i < cols; i++) { idx = i * rows + j; ctx.lineTo(X[idx], Y[idx]); }
-          if (j === accentRow) { ctx.lineWidth = 1.4; ctx.strokeStyle = rgba(p.pink, 0.75); }
+          if (j === accentRow) { ctx.lineWidth = 1.4; ctx.strokeStyle = rgba(p.lb, 0.8); }
           else { ctx.lineWidth = weftW[j] > 0.35 ? 1.25 : 1; ctx.strokeStyle = rgba(ink, weftW[j]); }
           ctx.stroke();
         }
@@ -259,7 +284,7 @@
           ctx.beginPath();
           ctx.moveTo(X[idx], Y[idx]);
           for (j = 1; j < rows; j++) ctx.lineTo(X[idx + j], Y[idx + j]);
-          if (i === accentCol) { ctx.lineWidth = 1.4; ctx.strokeStyle = rgba(p.teal, 0.85); }
+          if (i === accentCol) { ctx.lineWidth = 1.4; ctx.strokeStyle = rgba(p.la, 0.85); }
           else { ctx.lineWidth = warpW[i] > 0.45 ? 1.25 : 1; ctx.strokeStyle = rgba(ink, warpW[i]); }
           ctx.stroke();
         }
@@ -285,22 +310,75 @@
         v.addColorStop(0, rgba(p.mat, 0)); v.addColorStop(1, rgba(p.mat, 0.55));
         ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
 
-        /* threads near the pointer take on the teal light */
+        /* threads near the pointer catch light: colour shifts around the pointer
+           through the spectrum, like light bending through a material */
         if (ptr.e > 0.02) {
-          var R = 95;
-          for (var band = 0; band < 3; band++) {
-            var lo = band / 3, hi = (band + 1) / 3, path = new Path2D(), any = false;
-            for (i = 0; i < cols - 1; i++) {
-              for (j = 0; j < rows - 1; j++) {
-                idx = i * rows + j;
-                var w1 = near((X[idx] + X[idx + rows]) / 2, (Y[idx] + Y[idx + rows]) / 2, R);
-                if (w1 > lo && w1 <= hi) { path.moveTo(X[idx], Y[idx]); path.lineTo(X[idx + rows], Y[idx + rows]); any = true; }
-                var w2 = near((X[idx] + X[idx + 1]) / 2, (Y[idx] + Y[idx + 1]) / 2, R);
-                if (w2 > lo && w2 <= hi) { path.moveTo(X[idx], Y[idx]); path.lineTo(X[idx + 1], Y[idx + 1]); any = true; }
+          var R = 100, buckets = [];
+          for (var q0 = 0; q0 < 16; q0++) buckets.push(null);
+          var addSeg = function (ax, ay, bx2, by2) {
+            var mx = (ax + bx2) / 2, my = (ay + by2) / 2, wgt = near(mx, my, R);
+            if (wgt < 0.06) return;
+            var hb = Math.floor(((Math.atan2(my - ptr.sy, mx - ptr.sx) + Math.PI) / (2 * Math.PI)) * 8) % 8;
+            var key = hb * 2 + (wgt > 0.5 ? 1 : 0);
+            if (!buckets[key]) buckets[key] = new Path2D();
+            buckets[key].moveTo(ax, ay); buckets[key].lineTo(bx2, by2);
+          };
+          for (i = 0; i < cols - 1; i++) {
+            for (j = 0; j < rows - 1; j++) {
+              idx = i * rows + j;
+              addSeg(X[idx], Y[idx], X[idx + rows], Y[idx + rows]);
+              addSeg(X[idx], Y[idx], X[idx + 1], Y[idx + 1]);
+            }
+          }
+          ctx.lineWidth = 1.15;
+          for (var q1 = 0; q1 < 16; q1++) {
+            if (!buckets[q1]) continue;
+            ctx.strokeStyle = rgba(spec(q1 >> 1), (q1 & 1 ? 0.85 : 0.4) * Math.min(1, ptr.e * 1.2));
+            ctx.stroke(buckets[q1]);
+          }
+        }
+
+        /* waves of light from a click or key press */
+        for (var wv = waves.length - 1; wv >= 0; wv--) {
+          var Wv = waves[wv], wage = t - Wv.t0;
+          if (wage > WLIFE) { waves.splice(wv, 1); continue; }
+          if (wage < 0) continue;
+          var wr = wage * WSPEED, fade = 1 - wage / WLIFE, ease = fade * fade * (3 - 2 * fade), shift = Math.floor(wage / 150);
+          /* ripple rings */
+          ctx.lineWidth = 1.3;
+          ctx.strokeStyle = rgba(spec(shift), 0.6 * ease);
+          ctx.beginPath(); ctx.arc(Wv.x, Wv.y, wr, 0, Math.PI * 2); ctx.stroke();
+          ctx.strokeStyle = rgba(spec(shift + 3), 0.28 * ease);
+          ctx.beginPath(); ctx.arc(Wv.x, Wv.y, wr * 0.62, 0, Math.PI * 2); ctx.stroke();
+          /* threads on the wave front light up in concentric bands of the spectrum */
+          var wb = [], band = 30;
+          for (i = 0; i < cols - 1; i++) {
+            for (j = 0; j < rows - 1; j++) {
+              idx = i * rows + j;
+              for (var s2 = 0; s2 < 2; s2++) {
+                var n2 = s2 ? idx + 1 : idx + rows;
+                var mx2 = (X[idx] + X[n2]) / 2 - Wv.x, my2 = (Y[idx] + Y[n2]) / 2 - Wv.y, dm = Math.sqrt(mx2 * mx2 + my2 * my2);
+                if (Math.abs(dm - wr) > band) continue;
+                var ci = (Math.floor(dm / 38) + shift) % 8;
+                if (!wb[ci]) wb[ci] = new Path2D();
+                wb[ci].moveTo(X[idx], Y[idx]); wb[ci].lineTo(X[n2], Y[n2]);
               }
             }
-            if (any) { ctx.lineWidth = 1.1; ctx.strokeStyle = rgba(p.teal, 0.25 + hi * 0.6); ctx.stroke(path); }
           }
+          ctx.lineWidth = 1.5;
+          for (var c2 = 0; c2 < 8; c2++) if (wb[c2]) { ctx.strokeStyle = rgba(spec(c2), 0.85 * ease); ctx.stroke(wb[c2]); }
+          /* intersections illuminate in sequence as the front reaches them */
+          for (i = 0; i < cols; i++) {
+            for (j = 0; j < rows; j++) {
+              idx = i * rows + j;
+              var ix = X[idx] - Wv.x, iy = Y[idx] - Wv.y, di = Math.sqrt(ix * ix + iy * iy), gap = Math.abs(di - wr);
+              if (gap > 16) continue;
+              ctx.fillStyle = rgba(spec((Math.floor(di / 38) + shift) % 8), ease * (1 - gap / 16));
+              ctx.fillRect(X[idx] - 2.5, Y[idx] - 2.5, 5, 5);
+            }
+          }
+          /* the point of touch */
+          if (wage < 320) { ctx.fillStyle = rgba(p.la, 1 - wage / 320); ctx.fillRect(Wv.x - 3, Wv.y - 3, 6, 6); }
         }
 
         /* lit intersections: small squares, the site's signature mark */
@@ -308,7 +386,8 @@
           var L = lit[k];
           if (L.i >= cols || L.j >= rows) continue;
           idx = L.i * rows + L.j;
-          var col = p[ACCENTS[(k % 5 < 3 ? section : section + 1 + (k % 2)) % 3]];
+          /* mostly the language pair and the section accent, with a few spectral notes */
+          var col = k % 4 === 0 ? spec(k * 3) : k % 4 === 1 ? p.la : k % 4 === 2 ? p.lb : p[ACCENTS[section % 3]];
           var glow = reduce ? 0.8 : 0.55 + 0.4 * Math.sin(t * 0.0011 + L.ph);
           ctx.fillStyle = rgba(col, glow);
           ctx.fillRect(X[idx] - 2.5, Y[idx] - 2.5, 5, 5);
@@ -318,7 +397,10 @@
             for (j = 0; j < rows; j++) {
               idx = i * rows + j;
               var n = near(X[idx], Y[idx], 70);
-              if (n > 0.15) { ctx.fillStyle = rgba(p.teal, n); ctx.fillRect(X[idx] - 2, Y[idx] - 2, 4, 4); }
+              if (n > 0.15) {
+                var hb2 = Math.floor(((Math.atan2(Y[idx] - ptr.sy, X[idx] - ptr.sx) + Math.PI) / (2 * Math.PI)) * 8) % 8;
+                ctx.fillStyle = rgba(spec(hb2), n); ctx.fillRect(X[idx] - 2, Y[idx] - 2, 4, 4);
+              }
             }
           }
         }
@@ -380,7 +462,36 @@
         fig.addEventListener('pointerleave', function () { ptr.on = false; });
       }
 
+      /* the signature moment: a wave of light from the point of touch */
+      function addWave(x, y) {
+        var now = performance.now() - t0;
+        if (reduce) {
+          /* no motion: show a single still frame of the wave, then settle back */
+          waves = [{ x: x, y: y, t0: now - 420 }];
+          kick();
+          setTimeout(function () { waves = []; kick(); }, 900);
+        } else {
+          waves.push({ x: x, y: y, t0: now });
+          if (waves.length > 4) waves.shift();
+          kick();
+        }
+        if (wrap && wrap.classList) wrap.classList.add('has-played');
+      }
+      fig.addEventListener('pointerdown', function (e) {
+        if (e.button !== 0) return;
+        var r = canvas.getBoundingClientRect();
+        addWave(e.clientX - r.left, e.clientY - r.top);
+      });
+      /* keyboard (and assistive-technology clicks, which carry no pointer position) */
+      fig.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        addWave(ptr.on ? ptr.x : W / 2, ptr.on ? ptr.y : H / 2);
+      });
+      fig.addEventListener('click', function (e) { if (e.detail === 0) addWave(W / 2, H / 2); });
+
       return {
+        waves: function () { return waves.length; },
         retheme: function () {
           target = readPalette();
           if (reduce) { pal = readPalette(); }
@@ -394,6 +505,58 @@
         }
       };
     })(weaveFig);
+  }
+
+  /* ================================================================
+     Cursor halo: a fine ring and point that follow the system cursor
+     (which stays visible), respond to what is under it and pulse on
+     click. Fine pointers only; off with reduced motion; never takes input.
+     ================================================================ */
+  if (finePointer && !reduce) {
+    var cur = doc.createElement('div');
+    cur.className = 'cursor';
+    cur.setAttribute('aria-hidden', 'true');
+    cur.innerHTML = '<span class="cursor-ring"></span><span class="cursor-dot"></span>';
+    doc.body.appendChild(cur);
+    var cx = -100, cy = -100, tx = -100, ty = -100, craf = 0, lastTarget = null;
+    var cursorLoop = function () {
+      cx += (tx - cx) * 0.5; cy += (ty - cy) * 0.5;
+      cur.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)';
+      craf = (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.2) ? requestAnimationFrame(cursorLoop) : 0;
+    };
+    var cursorState = function (el) {
+      if (el === lastTarget || !el || !el.closest) return;
+      lastTarget = el;
+      var hero = el.closest('.weave');
+      var title = !hero && el.closest('.category-link');
+      var ext = !hero && !title && el.closest('a[target="_blank"], a[href^="mailto:"]');
+      var link = !hero && !title && !ext && el.closest('a, button, [role="button"], .fig-open');
+      var text = !hero && !title && !ext && !link && el.closest('p, li, dd, dt, h1, h2, figcaption');
+      cur.classList.toggle('is-hero', !!hero);
+      cur.classList.toggle('is-title', !!title);
+      cur.classList.toggle('is-external', !!ext);
+      cur.classList.toggle('is-link', !!link);
+      cur.classList.toggle('is-text', !!text);
+    };
+    doc.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      tx = e.clientX; ty = e.clientY;
+      if (!cur.classList.contains('is-on')) { cx = tx; cy = ty; cur.classList.add('is-on'); }
+      cursorState(e.target);
+      if (!craf) craf = requestAnimationFrame(cursorLoop);
+    }, { passive: true });
+    doc.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      cur.classList.add('is-down');
+      var inHero = e.target.closest && e.target.closest('.weave');
+      var pulse = doc.createElement('span');
+      pulse.className = inHero ? 'pulse is-hero' : 'pulse';
+      pulse.style.left = e.clientX + 'px'; pulse.style.top = e.clientY + 'px';
+      doc.body.appendChild(pulse);
+      pulse.addEventListener('animationend', function () { pulse.remove(); });
+    }, { passive: true });
+    doc.addEventListener('pointerup', function () { cur.classList.remove('is-down'); }, { passive: true });
+    doc.documentElement.addEventListener('mouseleave', function () { cur.classList.remove('is-on'); });
   }
 
   /* ================================================================
