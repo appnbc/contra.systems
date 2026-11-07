@@ -12,7 +12,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ui, specLabels, home, projects, EMAIL, SITE_URL } from './content.mjs';
+import { ui, specLabels, home, projects, greetings, EMAIL, SITE_URL } from './content.mjs';
+import { figureText } from './figure-text.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MEDIA = path.join(ROOT, 'media');
@@ -26,7 +27,7 @@ const LOCALE = { en: 'en_US', es: 'es_ES', it: 'it_IT' };
     return;
   }
   if (node && typeof node === 'object') for (const k of Object.keys(node)) checkAmpersands(node[k], `${trail}.${k}`);
-})({ ui, specLabels, home, projects }, 'content');
+})({ ui, specLabels, home, projects, greetings, figureText }, 'content');
 
 // ---------- image / video dimensions ----------
 const VIDEO = {
@@ -118,15 +119,24 @@ const withNum = (t, n) => ({ en: `${t.en} ${n}`, es: `${t.es} ${n}`, it: `${t.it
 function figure(pg, fig, n, kind) {
   const [w, h] = dims(fig.src);
   const src = pg.m(fig.src);
+  // alt describes the image; the caption stays visible beside it (see figure-text.mjs)
+  const text = figureText[fig.src] || {};
+  const alt = fig.alt || text.alt || fig.cap;
+  const detail = fig.detail || text.detail;
   const media = isVideo(fig.src)
     ? `<video src="${src}" poster="${pg.m(fig.src.replace('.mp4', '.jpg'))}" width="${w}" height="${h}" muted loop playsinline autoplay preload="metadata" ${pg.a([['aria-label', fig.cap]])}></video>`
-    : `<img src="${src}" width="${w}" height="${h}" ${kind === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" ${pg.a([['alt', fig.cap]])}>`;
+    : `<img src="${src}" width="${w}" height="${h}" ${kind === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" ${pg.a([['alt', alt]])}>`;
   return `
       <figure class="fig fig--${kind}${isVideo(fig.src) ? ' fig--video' : ''}" data-fig="${n}">
-        <button type="button" class="fig-open" data-full="${src}" ${pg.a([['aria-label', withNum(ui.openFig, n)]])}>
+        <button type="button" class="fig-open" data-full="${src}">
+          <span class="sr-only" ${pg.t(withNum(ui.openFig, n))}>${pg.s(withNum(ui.openFig, n))}</span>
           <span class="mat">${media}</span>
         </button>
-        <figcaption class="caption"><span class="fig-no">Fig ${n}.</span> <span ${pg.t(fig.cap)}>${pg.s(fig.cap)}</span></figcaption>
+        <figcaption class="caption"><span class="fig-no">Fig ${n}.</span> <span ${pg.t(fig.cap)}>${pg.s(fig.cap)}</span></figcaption>${detail ? `
+        <details class="fig-detail">
+          <summary ${pg.t(ui.figDetail)}>${pg.s(ui.figDetail)}</summary>
+          <div class="fig-detail-body" ${pg.t(detail)}>${pg.s(detail)}</div>
+        </details>` : ''}
       </figure>`;
 }
 
@@ -227,10 +237,10 @@ function footer(pg) {
 `;
 }
 
-function tail(pg) {
+function tail(pg, extra = {}) {
   const uiStrings = {};
   for (const k of ['copied', 'viewer', 'prev', 'next', 'close']) uiStrings[k] = ui[k];
-  const json = JSON.stringify({ en: pg.dict.en, es: pg.dict.es, it: pg.dict.it, ui: uiStrings }).replace(/</g, '\\u003c');
+  const json = JSON.stringify({ en: pg.dict.en, es: pg.dict.es, it: pg.dict.it, ui: uiStrings, ...extra }).replace(/</g, '\\u003c');
   return `
 <script type="application/json" id="i18n">${json}</script>
 <script src="${pg.root}assets/site.js" defer></script>
@@ -278,8 +288,11 @@ function buildHome(lang) {
       <p class="descriptor-support" ${pg.t(home.descriptorSupport)}>${pg.s(home.descriptorSupport)}</p>
     </div>
     <div class="weave-wrap">
-      <figure class="weave" role="button" tabindex="0" ${pg.a([['aria-label', ui.weaveLabel]])}><canvas aria-hidden="true"></canvas><div class="greet" aria-hidden="true"></div></figure>
-      <p class="weave-hint" aria-hidden="true"><i></i><span ${pg.t(ui.weaveHint)}>${pg.s(ui.weaveHint)}</span></p>
+      <figure class="weave" aria-hidden="true"><canvas></canvas><div class="greet"></div></figure>
+      <div class="weave-foot">
+        <p class="weave-hint" aria-hidden="true"><i></i><span ${pg.t(ui.weaveHint)}>${pg.s(ui.weaveHint)}</span></p>
+        <button type="button" class="greet-btn" ${pg.a([['aria-label', ui.greetBtnLabel]])}><span ${pg.t(ui.greetBtn)}>${pg.s(ui.greetBtn)}</span></button>
+      </div>
       <p class="sr-only greet-status" role="status"></p>
     </div>
   </section>
@@ -336,7 +349,7 @@ function buildHome(lang) {
       </div>` + signal);
   html += `</main>\n`;
   html += footer(pg);
-  html += tail(pg);
+  html += tail(pg, { greetings });
   write(pg, html);
 }
 
@@ -409,4 +422,9 @@ const missing = [...used].filter((f) => !fs.existsSync(path.join(MEDIA, f)));
 const unused = fs.readdirSync(MEDIA).filter((f) => !used.has(f));
 if (missing.length) { console.error('Missing media:', missing); process.exitCode = 1; }
 if (unused.length) console.warn('Unused media files:', unused);
+const figSrcs = [...home.systems.figs, ...projects.flatMap((p) => [p.hero, ...p.gallery])].map((f) => f.src).filter((f) => !isVideo(f));
+const withoutAlt = figSrcs.filter((f) => !(figureText[f] && figureText[f].alt));
+if (withoutAlt.length) console.warn('Figures without alt text in build/figure-text.mjs (falling back to the caption):', withoutAlt);
+const stray = Object.keys(figureText).filter((f) => !figSrcs.includes(f));
+if (stray.length) console.warn('figure-text.mjs entries for files no page uses:', stray);
 console.log(`Built ${LANGS.length * (projects.length + 1)} pages (${LANGS.join(', ')}) and sitemap.xml.`);

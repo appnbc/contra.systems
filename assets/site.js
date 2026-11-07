@@ -4,7 +4,8 @@
    - EN / ES / IT: each language has its own page; switching swaps text
      in place and moves the address bar to the matching page
    - woven-grid hero: a small generative artwork that answers the pointer;
-     a click releases a spectral wave and six multilingual greetings
+     a click, or the "Let's greet!" button, releases a spectral wave and
+     a greeting in English, Spanish and Italian
    - section colours: <html data-active> follows the section in view, so
      the rail, navigation and other indicators take on its prism colour
    - section rail, active navigation, footer signature of visited sections
@@ -509,84 +510,88 @@
         greet(x, y);
       }
 
-      /* ---- six multilingual greetings ----
-         Shown in all three languages whatever the page language. Words and
-         punctuation are separate spans so the punctuation takes its own colour.
-         The first group emerges near the point of touch, the second farther out;
-         each settles on a grid crossing, stays inside the artwork, and the
-         layer is cleared when they have faded. A new click restarts it. */
-      var GREETINGS = [
-        { cls: 'hello', lang: 'en', parts: ['Hello', '!'], punct: 'prism-cyan' },
-        { cls: 'hola', lang: 'es', parts: ['¡', 'Hola', '!'], punct: 'prism-amber' },
-        { cls: 'ciao', lang: 'it', parts: ['Ciao', '!'], punct: 'prism-violet' },
-        { cls: 'welcome', lang: 'en', parts: ['Welcome', '!'], punct: 'prism-rose' },
-        { cls: 'bienvenidos', lang: 'es', parts: ['¡', 'Bienvenidos', '!'], punct: 'prism-yellow' },
-        { cls: 'benvenuti', lang: 'it', parts: ['Benvenuti', '!'], punct: 'prism-coral' }
+      /* ---- the greeting: one set, in three languages at once ----
+         Sets come from build/content.mjs (dict.greetings) and follow one
+         another, so a greeting never repeats twice in a row. Words and
+         punctuation are separate spans so each mark takes its own colour.
+         The three phrases settle on grid crossings around the point of touch,
+         in a loose stagger, always inside the artwork; the layer is cleared
+         once they fade, and a new click restarts it rather than piling up. */
+      var SETS = (dict.greetings && dict.greetings.length) ? dict.greetings : [
+        { en: { t: 'Hello!', c: 'coral', p: ['cyan'] }, es: { t: '¡Hola!', c: 'rose', p: ['amber', 'cyan'] }, it: { t: 'Ciao!', c: 'amber', p: ['violet'] } }
       ];
+      var PUNCT = /([¡!¿?])/;
       var layer = fig.querySelector('.greet');
       var status = wrap && wrap.querySelector ? wrap.querySelector('.greet-status') : null;
-      var greetTimer = 0, greetCount = 0, lastSaid = 0;
+      var greetTimer = 0, setIdx = -1, lastSaid = 0;
+
+      function phrase(g, lg, voice) {
+        var el = doc.createElement('span');
+        el.className = 'gw gv' + voice + ' gc-' + g.c;
+        el.lang = lg;
+        var marks = 0;
+        g.t.split(PUNCT).forEach(function (part) {
+          if (!part) return;
+          var s = doc.createElement('span');
+          s.textContent = part;
+          if (PUNCT.test(part)) s.className = 'gp gp-' + (g.p[marks++] || g.p[0] || g.c);
+          el.appendChild(s);
+        });
+        return el;
+      }
 
       function greet(x, y) {
         if (!layer || W < 40 || H < 40) return;
         clearTimeout(greetTimer);
-        layer.textContent = '';   /* repeated clicks restart rather than accumulate */
-        greetCount++;
-        var gs = Math.max(13, Math.min(26, W * 0.042));
+        layer.textContent = '';
+        setIdx = (setIdx + 1) % SETS.length;
+        var set = SETS[setIdx];
+        var gs = Math.max(13, Math.min(24, W * 0.04));
         layer.style.setProperty('--gs', gs.toFixed(1) + 'px');
-        var pad = 12, placed = [], now = performance.now() - t0;
-        var turn = greetCount * 0.9 + (x / W) * 1.3;   /* vary the composition between clicks */
-        GREETINGS.forEach(function (g, n) {
-          var el = doc.createElement('span');
-          el.className = 'gw gw--' + g.cls;
-          el.lang = g.lang;
-          g.parts.forEach(function (part) {
-            var s = doc.createElement('span');
-            s.textContent = part;
-            if (part === '!' || part === '¡') s.className = 'gp';
-            el.appendChild(s);
-          });
+        var pad = 12, now = performance.now() - t0;
+        /* each set gives the three languages a different typographic voice */
+        var els = LANGS.map(function (lg, k) {
+          var el = phrase(set[lg], lg, (k + setIdx) % 3);
           layer.appendChild(el);
+          var fit = (W - pad * 2) / el.offsetWidth;   /* long phrases shrink to fit, never overflow */
+          if (fit < 1) el.style.setProperty('--fit', fit.toFixed(3));
+          return el;
+        });
+        var hMax = Math.max.apply(null, els.map(function (el) { return el.offsetHeight; }));
+        var lineH = Math.ceil(hMax * 1.45 / sp) * sp;
+        var cy = Math.max(pad + lineH * 1.5, Math.min(H - pad - lineH * 1.5, y));
+        els.forEach(function (el, k) {
           var w = el.offsetWidth, h = el.offsetHeight;
-          var group = n < 3 ? 0 : 1, k = n % 3;
-          var r = Math.min(W, H) * (group ? 0.37 : 0.2);
-          var best = null;
-          for (var tries = 0; tries < 18; tries++) {
-            var ang = turn + group * Math.PI / 3 + k * (2 * Math.PI / 3) + (tries ? (tries % 2 ? 1 : -1) * Math.ceil(tries / 2) * 0.33 : 0);
-            var rr = r * (tries > 9 ? 1.25 : 1);
-            var gi = Math.round((x + Math.cos(ang) * rr - ox) / sp), gj = Math.round((y + Math.sin(ang) * rr - oy) / sp);
-            var ax = ox + gi * sp, ay = oy + gj * sp;
-            /* the word sits just above-right of its crossing, clamped inside the artwork */
-            var bx = Math.max(pad, Math.min(W - w - pad, ax - w * 0.2));
-            var by = Math.max(pad, Math.min(H - h - pad, ay - h * 0.85));
-            var box = { x: bx, y: by, w: w, h: h, gi: gi, gj: gj };
-            var hit = placed.some(function (o) {
-              return !(box.x + box.w + 8 < o.x || o.x + o.w + 8 < box.x || box.y + box.h + 4 < o.y || o.y + o.h + 4 < box.y);
-            });
-            if (!best) best = box;
-            if (!hit) { best = box; break; }
-          }
-          placed.push(best);
-          var dirx = best.x + w / 2 - x, diry = best.y + h / 2 - y, dl = Math.sqrt(dirx * dirx + diry * diry) || 1;
-          var delay = reduce ? 0 : (group ? 520 : 110) + k * 90;
-          el.style.setProperty('--x', best.x.toFixed(1) + 'px');
-          el.style.setProperty('--y', best.y.toFixed(1) + 'px');
-          el.style.setProperty('--dx', (dirx / dl * 5).toFixed(1) + 'px');
-          el.style.setProperty('--dy', (diry / dl * 5 - 2).toFixed(1) + 'px');
+          var shift = (((k * 7 + setIdx * 3) % 5) - 2) * sp;   /* a loose, varied stagger */
+          var gj = Math.round((cy + (k - 1) * lineH - oy) / sp);
+          var gi = Math.round((x - w * 0.3 + shift - ox) / sp);
+          /* the phrase sits just above-right of its crossing, clamped inside the artwork */
+          var bx = Math.max(pad, Math.min(W - w - pad, ox + gi * sp - w * 0.2));
+          var by = Math.max(pad, Math.min(H - h - pad, oy + gj * sp - h * 0.85));
+          var dirx = bx + w / 2 - x, diry = by + h / 2 - y, dl = Math.sqrt(dirx * dirx + diry * diry) || 1;
+          var delay = reduce ? 0 : 90 + k * 150;
+          el.style.setProperty('--x', bx.toFixed(1) + 'px');
+          el.style.setProperty('--y', by.toFixed(1) + 'px');
+          el.style.setProperty('--dx', (dirx / dl * 4).toFixed(1) + 'px');
+          el.style.setProperty('--dy', (diry / dl * 4 - 2).toFixed(1) + 'px');
           el.style.setProperty('--d', delay + 'ms');
           if (!reduce) {
-            var ci = Math.max(0, Math.min(cols - 1, best.gi)), cj = Math.max(0, Math.min(rows - 1, best.gj));
-            traces.push({ i: ci, j: cj, c: g.punct, t0: now + delay + 300 });
-            if (traces.length > 12) traces.splice(0, traces.length - 12);
+            /* the closing mark lights the threads at the phrase's crossing */
+            var g = set[LANGS[k]];
+            var ci = Math.max(0, Math.min(cols - 1, Math.round((bx + w * 0.2 - ox) / sp)));
+            var cj = Math.max(0, Math.min(rows - 1, gj));
+            traces.push({ i: ci, j: cj, c: 'prism-' + (g.p[g.p.length - 1] || g.c), t0: now + delay + 300 });
+            if (traces.length > 9) traces.splice(0, traces.length - 9);
           }
         });
         kick();
-        greetTimer = setTimeout(function () { layer.textContent = ''; }, reduce ? 2100 : 2300);
-        /* the words are also announced, at most once every few seconds */
-        if (status && Date.now() - lastSaid > 4000) {
+        greetTimer = setTimeout(function () { layer.textContent = ''; }, 2100);
+        /* the greeting is also announced, without flooding repeated clicks */
+        if (status && Date.now() - lastSaid > 1500) {
           lastSaid = Date.now();
+          var said = LANGS.map(function (lg) { return set[lg].t; }).join(' ');
           status.textContent = '';
-          setTimeout(function () { status.textContent = 'Hello! ¡Hola! Ciao! Welcome! ¡Bienvenidos! Benvenuti!'; }, 60);
+          setTimeout(function () { status.textContent = said; }, 60);
         }
       }
 
@@ -595,13 +600,14 @@
         var r = canvas.getBoundingClientRect();
         addWave(e.clientX - r.left, e.clientY - r.top);
       });
-      /* keyboard (and assistive-technology clicks, which carry no pointer position) */
-      fig.addEventListener('keydown', function (e) {
-        if (e.key !== 'Enter' && e.key !== ' ') return;
-        e.preventDefault();
-        addWave(ptr.on ? ptr.x : W / 2, ptr.on ? ptr.y : H / 2);
+      /* the "Let's greet!" button: the keyboard and assistive-technology path
+         to the same moment, released from a point inside the artwork */
+      var greetBtn = wrap && wrap.querySelector ? wrap.querySelector('.greet-btn') : null;
+      if (greetBtn) greetBtn.addEventListener('click', function (e) {
+        var bx = W * (0.38 + Math.random() * 0.24), by = H * (0.4 + Math.random() * 0.2);
+        if (e.detail > 0 && ptr.on) { bx = ptr.x; by = ptr.y; }
+        addWave(bx, by);
       });
-      fig.addEventListener('click', function (e) { if (e.detail === 0) addWave(W / 2, H / 2); });
 
       return {
         waves: function () { return waves.length; },
@@ -816,7 +822,10 @@
     } else {
       media = current;
     }
-    var label = cap ? cap.textContent.trim() : '';
+    /* the enlarged image keeps the figure's description; the caption is shown beside it */
+    var orig = fig.querySelector('.mat img, .mat video');
+    var label = orig ? (orig.getAttribute('alt') || orig.getAttribute('aria-label') || '') : '';
+    if (!label && cap) label = cap.textContent.trim();
     if (media.tagName === 'IMG') media.alt = label; else media.setAttribute('aria-label', label);
     d.querySelector('.lb-caption').innerHTML = cap ? cap.innerHTML : '';
     d.querySelector('.lb-count').innerHTML = '<b>Fig ' + fig.getAttribute('data-fig') + '</b> — ' + (lb.i + 1) + ' / ' + figs.length;

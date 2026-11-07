@@ -492,35 +492,44 @@ html[lang="it"] .seg--lang { --i: 2; }
 .weave::after { border-color: var(--lb); }
 .weave::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
 .weave::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
-.weave[role="button"] { cursor: crosshair; }
-.weave:focus-visible { outline: 2px solid var(--ink); outline-offset: 6px; }
+.weave { cursor: crosshair; }
 
-/* ---------- Hero greetings: six words that emerge from the grid ----------
-   Each phrase has its own colour and typographic voice; punctuation is set
-   apart in a brighter spectral hue. Positioned by script at grid crossings,
-   always inside the artwork, and removed once the animation ends. */
+/* ---------- Hero greetings: one set, three languages, from the grid ----------
+   Each phrase takes a typographic voice and a word colour; its punctuation is
+   set apart in a contrasting, briefly brighter prism hue. Positioned by script
+   at grid crossings, always inside the artwork, removed once they fade. */
 .greet { position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; --gs: 20px; }
 .gw {
   position: absolute;
   left: 0; top: 0;
   white-space: nowrap;
-  font-size: var(--gs);
+  font-size: calc(var(--gs) * var(--k, 1) * var(--fit, 1));
   line-height: 1;
   color: var(--g-c);
-  /* a soft halo of the artwork's own ground keeps each word legible over the threads */
+  /* a soft halo of the artwork's own ground keeps each phrase legible over the threads */
   text-shadow: 0 0 3px var(--mat), 0 0 8px var(--mat), 0 0 14px var(--mat);
   opacity: 0;
   will-change: transform, opacity;
   animation: greet 1500ms var(--ease) var(--d, 0ms) both;
 }
 .gw .gp { color: var(--g-p); display: inline-block; animation: punct 1500ms ease var(--d, 0ms) both; }
-/* six voices: serif, sans and mono, varied in weight, slope and spacing */
-.gw--hello { --g-c: var(--prism-coral-text);  --g-p: var(--prism-cyan);   font-family: var(--serif); font-style: italic; font-size: calc(var(--gs) * 1.3); letter-spacing: -0.005em; }
-.gw--hola { --g-c: var(--prism-rose-text);    --g-p: var(--prism-amber);  font-family: var(--sans); font-weight: 600; letter-spacing: -0.025em; font-size: calc(var(--gs) * 1.08); }
-.gw--ciao { --g-c: var(--prism-amber-text);   --g-p: var(--prism-violet); font-family: var(--mono); font-weight: 400; letter-spacing: 0.08em; font-size: calc(var(--gs) * 0.86); }
-.gw--welcome { --g-c: var(--prism-teal-text); --g-p: var(--prism-rose);   font-family: var(--serif); font-weight: 400; letter-spacing: 0.01em; font-size: calc(var(--gs) * 1.12); }
-.gw--bienvenidos { --g-c: var(--prism-blue-text); --g-p: var(--prism-yellow); font-family: var(--sans); font-weight: 300; letter-spacing: 0.05em; font-size: calc(var(--gs) * 0.94); }
-.gw--benvenuti { --g-c: var(--prism-violet-text); --g-p: var(--prism-coral); font-family: var(--serif); font-style: italic; font-weight: 300; letter-spacing: 0.04em; font-size: calc(var(--gs) * 1.18); }
+/* three voices: an editorial serif italic, a contemporary sans, a restrained mono */
+.gv0 { --k: 1.3; font-family: var(--serif); font-style: italic; letter-spacing: -0.005em; }
+.gv1 { --k: 1.06; font-family: var(--sans); font-weight: 600; letter-spacing: -0.02em; }
+.gv2 { --k: 0.84; font-family: var(--mono); font-weight: 400; letter-spacing: 0.06em; }
+/* word colours (the readable -text tones) and punctuation colours (the brighter tones) */
+.gc-coral { --g-c: var(--prism-coral-text); }          .gp-coral { --g-p: var(--prism-coral); }
+.gc-orange { --g-c: var(--prism-orange-text); }        .gp-orange { --g-p: var(--prism-orange); }
+.gc-amber { --g-c: var(--prism-amber-text); }          .gp-amber { --g-p: var(--prism-amber); }
+.gc-yellow { --g-c: var(--prism-yellow-text); }        .gp-yellow { --g-p: var(--prism-yellow); }
+.gc-chartreuse { --g-c: var(--prism-chartreuse-text); } .gp-chartreuse { --g-p: var(--prism-chartreuse); }
+.gc-teal { --g-c: var(--prism-teal-text); }            .gp-teal { --g-p: var(--prism-teal); }
+.gc-cyan { --g-c: var(--prism-cyan-text); }            .gp-cyan { --g-p: var(--prism-cyan); }
+.gc-blue { --g-c: var(--prism-blue-text); }            .gp-blue { --g-p: var(--prism-blue); }
+.gc-indigo { --g-c: var(--prism-indigo-text); }        .gp-indigo { --g-p: var(--prism-indigo); }
+.gc-violet { --g-c: var(--prism-violet-text); }        .gp-violet { --g-p: var(--prism-violet); }
+.gc-magenta { --g-c: var(--prism-magenta-text); }      .gp-magenta { --g-p: var(--prism-magenta); }
+.gc-rose { --g-c: var(--prism-rose-text); }            .gp-rose { --g-p: var(--prism-rose); }
 @keyframes greet {
   0% { opacity: 0; transform: translate(var(--x), calc(var(--y) + 7px)) scale(0.97); filter: blur(2px); }
   18% { opacity: 1; transform: translate(var(--x), var(--y)) scale(1); filter: blur(0); }
@@ -578,6 +587,46 @@ html[lang="it"] .seg--lang { --i: 2; }
 }
 @keyframes hint-run { 0% { left: -6px; } 60%, 100% { left: 18px; } }
 .weave-wrap.has-played .weave-hint { opacity: 0.45; }
+
+/* the row under the artwork: the hint, and a small invitation to greet */
+.weave-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  margin-top: 0.8rem;
+}
+.weave-foot .weave-hint { margin: 0; }
+.greet-btn {
+  position: relative;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem 0.42rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color var(--fast) ease, color var(--fast) ease, background-color var(--fast) ease;
+}
+/* a fine spectral thread along the base, which runs full width on hover */
+.greet-btn::after {
+  content: '';
+  position: absolute;
+  left: 50%; right: 50%; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--prism-coral), var(--prism-amber), var(--prism-teal), var(--prism-blue), var(--prism-violet), var(--prism-rose));
+  transition: left var(--mid) var(--ease), right var(--mid) var(--ease);
+}
+.greet-btn:hover { border-color: var(--la); background: color-mix(in srgb, var(--la) 7%, transparent); }
+.greet-btn:hover::after, .greet-btn:focus-visible::after { left: 1rem; right: 1rem; }
+.greet-btn:active { background: color-mix(in srgb, var(--la) 14%, transparent); }
+.greet-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+@media not (any-pointer: fine) { .greet-btn { min-height: 2.75rem; padding-inline: 1.1rem; } }
 
 /* ---------- Indexed blocks ---------- */
 .block {
@@ -1019,6 +1068,44 @@ html[lang="it"] .seg--lang { --i: 2; }
 .fig-no { color: var(--ink); transition: color var(--fast) ease; }
 .fig:hover .fig-no, .fig:focus-within .fig-no { color: var(--section-accent-text); }
 .fig--video .fig-no::after { content: ' ▸'; color: var(--section-accent-text); }
+
+/* Accessible Image Text and Detail: a quiet disclosure under the caption */
+.fig-detail { margin-top: 0.55rem; border-top: 1px solid var(--border-color); }
+.fig-detail summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+  transition: color var(--fast) ease;
+}
+.fig-detail summary::-webkit-details-marker { display: none; }
+.fig-detail summary::before {
+  content: '';
+  flex: none;
+  width: 5px; height: 5px;
+  border: 1px solid var(--section-accent);
+  transition: transform var(--mid) var(--ease), background-color var(--mid) ease;
+}
+.fig-detail[open] summary::before { transform: rotate(45deg); background: var(--section-accent); }
+.fig-detail summary:hover { color: var(--ink); }
+.fig-detail summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.fig-detail-body {
+  padding: 0.35rem 0 0.4rem;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--ink);
+  max-width: 68ch;
+}
+.fig-detail-body p { margin: 0 0 0.6rem; }
+.fig-detail-body ul, .fig-detail-body ol { margin: 0 0 0.6rem; padding-left: 1.2rem; }
+.fig-detail-body li { margin-bottom: 0.25rem; }
 
 /* Fig 1: hero on a neutral mat */
 .hero { margin-bottom: clamp(3.5rem, 8vw, 5.5rem); scroll-margin-top: 1.5rem; }

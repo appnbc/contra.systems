@@ -23,10 +23,11 @@ export const ui = {
   night: L('Night', 'Noche', 'Notte'),
   sectionsNav: L('Sections', 'Secciones', 'Sezioni'),
   weaveHint: L('Interact to explore', 'Interactúa para explorar', 'Interagisci per esplorare'),
-  weaveLabel: L(
-    'Activate the interactive visual. Press Enter or Space to send a wave of light and a multilingual greeting through the woven grid.',
-    'Activar la obra visual interactiva. Pulsa Intro o Espacio para enviar una onda de luz y un saludo multilingüe a través de la retícula tejida.',
-    "Attiva l'opera visiva interattiva. Premi Invio o Spazio per inviare un'onda di luce e un saluto multilingue attraverso la griglia intrecciata."),
+  greetBtn: L("Let's greet!", '¡Saludémonos!', 'Salutiamoci!'),
+  greetBtnLabel: L(
+    "Let's greet! Sends a wave of light through the woven grid and a greeting in English, Spanish and Italian.",
+    '¡Saludémonos! Envía una onda de luz a través de la retícula tejida y un saludo en inglés, español e italiano.',
+    "Salutiamoci! Invia un'onda di luce attraverso la griglia intrecciata e un saluto in inglese, spagnolo e italiano."),
   shortcut: L('Keyboard shortcut:', 'Atajo de teclado:', 'Scorciatoia da tastiera:'),
   terms: L('Terms in three languages', 'Términos en tres idiomas', 'Termini in tre lingue'),
   practices: L('Three intersecting practices', 'Tres prácticas que se cruzan', 'Tre pratiche che si intersecano'),
@@ -44,15 +45,36 @@ export const ui = {
   copy: L('Copy Email', 'Copiar Correo', 'Copia Email'),
   copied: L('Copied', 'Copiado', 'Copiato'),
   openFig: L('View full size: Fig', 'Ver a tamaño completo: Fig', 'Apri a dimensione intera: Fig'),
+  figDetail: L('Accessible Image Text and Detail', 'Texto y detalle accesibles de la imagen', "Testo e dettagli accessibili dell'immagine"),
   viewer: L('Image viewer', 'Visor de imágenes', 'Visualizzatore di immagini'),
   prev: L('Previous', 'Anterior', 'Precedente'),
   next: L('Next', 'Siguiente', 'Successivo'),
   close: L('Close', 'Cerrar', 'Chiudi'),
 };
 
-// The six hero greetings are deliberately shown in all three languages at
-// once, whatever language the page is in. They live in assets/site.js
-// (GREETINGS) so their punctuation can be styled separately.
+// Hero greetings. Each click (or the "Let's greet!" button) shows one set,
+// in English, Spanish and Italian together, whatever language the page is
+// in; sets follow one another so the same greeting never repeats twice in a
+// row. Each phrase names its word colour (c) and the colours of its
+// punctuation marks in reading order (p), from the prism palette.
+// assets/site.js splits words from punctuation so each mark takes its own colour.
+export const greetings = [
+  { en: { t: 'Hello!', c: 'coral', p: ['cyan'] },
+    es: { t: '¡Hola!', c: 'rose', p: ['amber', 'cyan'] },
+    it: { t: 'Ciao!', c: 'amber', p: ['violet'] } },
+  { en: { t: 'Welcome!', c: 'violet', p: ['amber'] },
+    es: { t: '¡Bienvenidos!', c: 'blue', p: ['yellow', 'rose'] },
+    it: { t: 'Benvenuti!', c: 'teal', p: ['coral'] } },
+  { en: { t: 'Nice to see you!', c: 'cyan', p: ['magenta'] },
+    es: { t: '¡Qué gusto verte!', c: 'magenta', p: ['chartreuse', 'amber'] },
+    it: { t: 'Che piacere vederti!', c: 'orange', p: ['blue'] } },
+  { en: { t: "So glad you're here!", c: 'indigo', p: ['orange'] },
+    es: { t: '¡Qué alegría que estés aquí!', c: 'coral', p: ['teal', 'violet'] },
+    it: { t: 'Che bello averti qui!', c: 'chartreuse', p: ['rose'] } },
+  { en: { t: 'Thanks for stopping by!', c: 'teal', p: ['rose'] },
+    es: { t: '¡Gracias por la visita!', c: 'orange', p: ['cyan', 'violet'] },
+    it: { t: 'Grazie della visita!', c: 'magenta', p: ['amber'] } },
+];
 
 export const specLabels = {
   role: L('Role', 'Rol', 'Ruolo'),

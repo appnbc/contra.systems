@@ -38,7 +38,7 @@ copy contains an ampersand, and it warns about missing or unused files in
 ## Keyboard
 
 `J`/`K` or `↑`/`↓` step through sections · `←`/`→` move between figures ·
-`Enter`/`Space` open a figure (or, on the hero, release the greeting) ·
+`Enter`/`Space` open a focused figure, or press the focused "Let's greet!" button ·
 `1` Day/Night · `2` EN → ES → IT (number row or keypad; shown as small keycaps
 beside the controls on keyboard devices) ·
 `Esc` closes the viewer, or (like `Backspace`) returns to the index from a
